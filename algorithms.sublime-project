@@ -1,0 +1,9 @@
+{
+	"folders":
+	[
+		{
+			"path": "/Users/stevenpowell/DEV/codingSteve/algorithms",
+			"file_exclude_patterns" : ["*.class", "*.sublime*", ".gitignore"]
+		}
+	]
+}
