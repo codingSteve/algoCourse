@@ -1,16 +1,32 @@
 
+import java.nio.file.*;
+import java.util.*;
+
 public class Inversions {
   private static String numbers = "100\n1\n101\n2";
 
-  public static void main(final String[] ARGV) { 
-  	System.out.println("inversions == " + countInversions(numbers));
+  public static void main(final String[] ARGV) throws Exception { 
+
+    if ("--file".equals(ARGV[0])) {
+      for (int i = 1 ; i < ARGV.length ; i ++ ){
+        String fileName = ARGV[i];
+        final Path p = FileSystems.getDefault().getPath(fileName);
+        final List<String> numbers = Files.readAllLines(p);
+        System.out.println("Inversions from " + fileName + " == " + countInversions(numbers.toArray(new String[]{})));
+      }
+    }
+    else if ("--test".equals(ARGV[0]))
+  	   System.out.println("inversions == 3 ? " + ( 3== countInversions(numbers)._1));
+     else {
+      System.out.println("Inversions from ARGV == " + countInversions(ARGV));
+     }
   }
 
   static Tuple countInversions(String numbers) {
   	return countInversions(numbers.split("\n"));
   }
 
-  static Tuple countInversions(String... numbers) {
+  static Tuple countInversions( String[] numbers ) {
 
   	if ( numbers.length <= 1 )
   		return new Tuple(0, numbers);
@@ -27,14 +43,14 @@ public class Inversions {
 
   	Tuple sResult = countSplitInversions(lResult._2, rResult._2);
 
-  	int inversions = lResult._1 + rResult._1 + sResult._1;
+  	long inversions = lResult._1 + rResult._1 + sResult._1;
 
   	return new Tuple(inversions, sResult._2);
   }
 
   static Tuple countSplitInversions( String[] l, String[] r ){
   	String[] merged = new String[l.length + r.length];
-  	int inversions = 0;
+  	long inversions = 0;
 
   	int j = 0;
   	int k = 0;
@@ -63,14 +79,15 @@ public class Inversions {
   		}
 	  	
 	  	// Utils.logStrings(merged);
-	}
-  	return new Tuple(inversions, merged);
+	  }
+  	
+    return new Tuple(inversions, merged);
   }
 
   static class Tuple { 
-  	final public int _1;
+  	final public long _1;
   	final public String[] _2;
-  	Tuple(int elementOne, String[] elementTwo) {
+  	Tuple(long elementOne, String[] elementTwo) {
   		_1 = elementOne;
   		_2 = elementTwo;
   	}
