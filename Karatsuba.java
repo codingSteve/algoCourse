@@ -24,12 +24,12 @@ public class Karatsuba {
 	}
 
 	public static String k(String m, String n) {
-		System.out.print("Starting with "); logStrings(m,n);
+		System.out.print("Starting with "); Utils.logStrings(m,n);
 		if ( m.length() <= 2 && n.length() <= 2 ) { 
 			int m_ = Integer.valueOf(m).intValue();
 			int n_ = Integer.valueOf(n).intValue();
 			System.out.print("returning");
-			logInts( m_, n_, m_* n_ );
+			Utils.logInts( m_, n_, m_* n_ );
 			return "" + m_ * n_;
 		}
 		
@@ -60,7 +60,7 @@ public class Karatsuba {
 							.subtract(new BigInteger(ac))
 							.toString();
 
-		logStrings("ac, bd, ef", ac, bd, ef);
+		// logStrings("ac, bd, ef", ac, bd, ef);
 
 		int twoN = (mLength - a.length())  +  (nLength - c.length()) ;
 
@@ -68,7 +68,7 @@ public class Karatsuba {
 		final BigInteger termTwo   = new BigInteger(bd);
 		final BigInteger termThree = new BigInteger(ef + ZEROS.substring(0, twoN/2));
 
-		logStrings("t1, t2, t3", termOne.toString(), termTwo.toString(), termThree.toString());
+		Utils.logStrings("t1, t2, t3", termOne.toString(), termTwo.toString(), termThree.toString());
 
 		return stripLeadingZeros( termOne.add(termTwo).add(termThree).toString() );
 	}
@@ -78,22 +78,5 @@ public class Karatsuba {
 		return (s_.isEmpty()) ? "0" : s_;
 	}
 
-	public static void logInts(int... ints){
-		System.out.print('[');
-		for (int i : ints) {
-			System.out.print(i);
-			System.out.print(',');
-		}
-		System.out.println(']');
-	}
 
-	public static void logStrings(String... strings) { 
-		System.out.print('[');
-		
-		for(String s : strings) { 
-			System.out.print(s);
-			System.out.print(',');
-		}
-		System.out.println(']');
-	}
 }
