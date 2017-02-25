@@ -3,7 +3,7 @@ import java.nio.file.*;
 import java.util.*;
 
 public class Inversions {
-  private static String numbers = "100\n1\n101\n2";
+  private static Tuple test = new Tuple(3, Utils.stringsToIntegers("100\n1\n101\n2".split("\n")));
 
   public static void main(final String[] ARGV) throws Exception { 
 
@@ -12,28 +12,33 @@ public class Inversions {
         String fileName = ARGV[i];
         final Path p = FileSystems.getDefault().getPath(fileName);
         final List<String> numbers = Files.readAllLines(p);
-        System.out.println("Inversions from " + fileName + " == " + countInversions(numbers.toArray(new String[]{})));
+        final Integer[] numbersArray = Utils.stringsToIntegers(numbers.toArray(new String[]{}));
+
+        long start = System.nanoTime();
+
+        System.out.println("Inversions from " + fileName + " == " + countInversions(numbersArray) + " in " + (int) ( (System.nanoTime() - start) / 10E6) + "ms");
+
       }
     }
     else if ("--test".equals(ARGV[0]))
-  	   System.out.println("inversions == 3 ? " + ( 3== countInversions(numbers)._1));
+  	   System.out.println("inversions for test case correct? " + ( test._1 == countInversions(test._2)._1));
      else {
-      System.out.println("Inversions from ARGV == " + countInversions(ARGV));
+      System.out.println("Inversions from ARGV == " + countInversions( Utils.stringsToIntegers(ARGV)));
      }
   }
 
   static Tuple countInversions(String numbers) {
-  	return countInversions(numbers.split("\n"));
+  	return countInversions( Utils.stringsToIntegers(numbers.split("\n")));
   }
 
-  static Tuple countInversions( String[] numbers ) {
+  static Tuple countInversions( Integer[] numbers ) {
 
   	if ( numbers.length <= 1 )
   		return new Tuple(0, numbers);
 
 
-  	final String[] l = new String[numbers.length / 2 ];
-  	final String[] r = new String[numbers.length - (numbers.length / 2 ) ];
+  	final Integer[] l = new Integer[numbers.length / 2 ];
+  	final Integer[] r = new Integer[numbers.length - (numbers.length / 2 ) ];
 
   	System.arraycopy(numbers,        0, l, 0, l.length );
   	System.arraycopy(numbers, l.length, r, 0, r.length );
@@ -48,37 +53,31 @@ public class Inversions {
   	return new Tuple(inversions, sResult._2);
   }
 
-  static Tuple countSplitInversions( String[] l, String[] r ){
-  	String[] merged = new String[l.length + r.length];
+  static Tuple countSplitInversions( Integer[] l, Integer[] r ){
+  	Integer[] merged = new Integer[l.length + r.length];
   	long inversions = 0;
-
-  	int j = 0;
-  	int k = 0;
+  	int i=0, j=0 , k=0 ;
   	
-  	for (int i = 0 ; i < merged.length ; i++ ) { 
-  		boolean remainingL = j < l.length;
-  		boolean remainingR = k < r.length;
+  	while( i < merged.length ) { 
+  		if ( j < l.length && k < r.length ) { 
 
-  		if ( remainingL && remainingR ) { 
-  			int currentL = Integer.valueOf(l[j]).intValue();
-  		 	int currentR = Integer.valueOf(r[k]).intValue();
-
-  		 	if ( currentL <= currentR ) {
-  				merged[i] = l[j++];
+        Integer cl = l[j] ;
+        Integer cr = r[k] ;
+  			
+  		 	if ( cl.compareTo( cr ) <= 0 ) {
+  				merged[i++] = cl;
+          j++;
   			}
   			else {
-  				merged[i] = r[k++];
+  				merged[i++] = cr; 
+          k++;
   				inversions += l.length - j;
   			}
   		}
-  		else if (!remainingL) { 
-  				merged[i] = r[k++];
-  		}
-  		else if ( !remainingR ) {
-  			merged[i] = l[j++];
-  		}
-	  	
-	  	// Utils.logStrings(merged);
+      else {
+        for ( ; j < l.length; j++ ) merged[i++] = l[j];
+        for ( ; k < r.length; k++ ) merged[i++] = r[k];
+      }
 	  }
   	
     return new Tuple(inversions, merged);
@@ -86,8 +85,8 @@ public class Inversions {
 
   static class Tuple { 
   	final public long _1;
-  	final public String[] _2;
-  	Tuple(long elementOne, String[] elementTwo) {
+  	final public Integer[] _2;
+  	Tuple(long elementOne, Integer[] elementTwo) {
   		_1 = elementOne;
   		_2 = elementTwo;
   	}

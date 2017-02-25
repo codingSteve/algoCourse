@@ -17,4 +17,9 @@ public class Utils {
 		}
 		System.out.println(']');
 	}
+	public static Integer[] stringsToIntegers( final String[] strings ){
+		Integer[] integers = new Integer[strings.length];
+		for( int i = strings.length; --i >=0;) integers[i] = Integer.valueOf(strings[i]);
+		return integers;
+	}
 }
