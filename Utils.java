@@ -8,6 +8,15 @@ public class Utils {
 		System.out.println(']');
 	}
 
+	public static void logIntegers(Integer... ints){
+		System.out.print('[');
+		for (Integer i : ints) {
+			System.out.print(i);
+			System.out.print(',');
+		}
+		System.out.println(']');
+	}
+
 	public static void logStrings(String... strings) { 
 		System.out.print('[');
 		
