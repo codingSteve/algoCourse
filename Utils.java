@@ -34,11 +34,28 @@ public class Utils {
     if ( i == _loopMax ) System.out.print( "... ");
 		System.out.println(']');
 	}
+
+  public static int[][] fileToRaggedArrayOfInts( final String fileName ) throws Exception { return fileToRaggedArrayOfInts(fileName, "\t"); }
+
+  public static int[][] fileToRaggedArrayOfInts( final String fileName, final String delimiter ) throws Exception {
+        final Path p = FileSystems.getDefault().getPath(fileName);
+        final List<String> records = Files.readAllLines(p);
+        int[][] rows = new int[records.size()][];
+        for ( int i = records.size(); --i >= 0 ; ) { rows[i] = stringsToInts( records.get(i).split(delimiter) ); }
+        return rows;
+  }
+
   public static int[] fileToInts( final String fileName ) throws Exception {
         final Path p = FileSystems.getDefault().getPath(fileName);
         final List<String> numbers = Files.readAllLines(p);
         return stringsToInts(numbers);
   }
+
+	public static int[] stringsToInts( final String[] strings ){
+		int[] ints = new int[strings.length];
+		for( int i = strings.length; --i >=0;) ints[i] = Integer.valueOf(strings[i]).intValue();
+		return ints;
+	}
 
 	public static int[] stringsToInts( final List<String> strings ){
 		int[] ints = new int[strings.size()];
