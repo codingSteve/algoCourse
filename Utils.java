@@ -3,6 +3,16 @@ import java.nio.file.*;
 
 public class Utils { 
   public static int  _loopMax = 20;
+  public static void logRaggedInts( int[]... twoDimensionalArray ) {
+    int i = 0;
+
+    System.out.println('[');
+    for ( ; i < twoDimensionalArray.length && i < _loopMax ; i++ ) {
+      logInts(twoDimensionalArray[i]);
+    }
+    if ( i == _loopMax ) System.out.print( "... ");
+    System.out.println(']');
+  }
 	public static void logInts(int... ints){
 		System.out.print('[');
     int i  =0 ;
