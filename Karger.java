@@ -141,6 +141,18 @@ public class Karger {
 
     for ( int r = rawInput.length ; --r >= 0 ; ) { 
       for ( int c = rawInput[r].length ; --c >= 1 ; ) { 
+        // the adjacency list describes all the nodes
+        // linked to the one in the first column even 
+        // if the edge has  been described elsewhere
+        //
+        // so [ [1,2,3] [2,1] [ 3, 1] ] 
+        // is a valid adjency list which means
+        // Edge[] edges = new Edge[]{ { 1 -> 3}, {1 -> 2} };
+        //
+        // If we were dealing with a directed graph this
+        // assumption wouldn't hold as the head / tail order
+        // have meaning
+        //
         if ( rawInput[r][c] <= rawInput[r][0] ) continue;
 
         Node head = new Node( rawInput[r][0] );
@@ -152,22 +164,30 @@ public class Karger {
     }
 
     if ( _loud ) {
-      Utils.logInts( edges.size(), nodes.size() );
-      for ( Edge e : edges ) System.out.println ( e.toString() );
-      for ( Node n : nodes ) System.out.println ( n.toString() );
+        Utils.logStrings( "Remaining edges: " + edges.size(), "Remaining nodes : " + nodes.size() );
+        System.out.print("Edges: ");
+        for ( Edge e : edges ) System.out.print ( e.toString() + " " );
+        System.out.print("\nNodes: ");
+        for ( Node n : nodes ) System.out.print ( n.toString() + " "  );
+        System.out.println("");
     }
 
     while ( nodes.size() > 2 ) { 
       final int remainingEdges = edges.size();
-      //Utils.logInts( remainingEdges, nodes.size() );
-      //for ( Edge e : edges ) System.out.println ( e.toString() );
-      //for ( Node n : nodes ) System.out.println ( n.toString() );
+      if ( _loud ) {
+        Utils.logStrings( "Remaining edges: " + edges.size(), "Remaining nodes : " + nodes.size() );
+        System.out.print("Edges: ");
+        for ( Edge e : edges ) System.out.print ( e.toString() + " "  );
+        System.out.print("\nNodes: ");
+        for ( Node n : nodes ) System.out.print ( n.toString() + " " );
+        System.out.println("");
+      }
 
       final int target = generator.nextInt( remainingEdges ); 
 
       Edge e = edges.remove( target );
 
-      if ( _loud ) System.out.println( "About to collapse : " + e.toString() );
+      if ( _loud ) Utils.logStrings( "About to collapse an edge",  e.toString() );
 
       nodes.remove( e._tail );
 
