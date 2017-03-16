@@ -38,7 +38,7 @@ public class Karger {
   private static int[][] testCase3 = new int[][]{ {1,2,3,4}, {2,1,3,4}, {3,1,2,4}, {4,1,2,3,5}, {5,4,6,7,8}, {6,5,7,8}, {7,5,6,8}, {8,5,6,7}};
   private static int     minCut3   = 1;
 
-  // test case fourt is a huffle of the above
+  // test case fourt is a shuffle of the above
   private static int[][] testCase4 = new int[][]{ {1,3,4,2}, {2,1,4,3}, {3,1,2,4}, {4,5,3,2,1}, {5,4,8,6,7}, {6,8,7,5}, {7,5,8,6}, {8,5,7,6}};
   private static int     minCut4   = 1;
 
