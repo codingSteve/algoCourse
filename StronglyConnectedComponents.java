@@ -27,4 +27,23 @@ public class StronglyConnectedComponents {
   public static int[] StronglyConnectedComponents( int[][] rawInput, int outputSize ){
     return new int[5];
   }
+  
+  public static class Node {
+    int _id;
+    int _leader;
+    int _finishTime;
+    boolean _explored; 
+    List<Node> _adjecentNodes;
+    
+    public void dfs() {
+      for ( Node n : _adjacentNodes ) {
+        if ( ! n.isExplored() ){
+          n.isExplored( true );
+          n.dfs();
+        }
+      }
+    }
+  }
+  
+  
 }
