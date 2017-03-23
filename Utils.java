@@ -24,6 +24,17 @@ public class Utils {
 		System.out.println(']');
 	}
 
+	public static void logObjects( Object... objs ){
+		System.out.print('[');
+		int i = 0 ; 
+		for ( ; i < objs.length && i< _loopMax ; i++ ) { 
+			System.out.print(objs[i].toString());
+			System.out.print(',');
+		}
+		if ( i == _loopMax ) System.out.print("…");
+		System.out.println(']');
+	}
+
 	public static void logIntegers(Integer... ints){
 		System.out.print('[');
 		for (Integer i : ints) {
