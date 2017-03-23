@@ -60,10 +60,17 @@ public class Utils {
 
   public static int[][] fileToRaggedArrayOfInts( final String fileName, final String delimiter ) throws Exception {
         final Path p = FileSystems.getDefault().getPath(fileName);
-        final List<String> records = Files.readAllLines(p);
-        int[][] rows = new int[records.size()][];
-        for ( int i = records.size(); --i >= 0 ; ) { rows[i] = stringsToInts( records.get(i).split(delimiter) ); }
+        final String[] records = fileToStringArray( fileName );
+
+        int[][] rows = new int[records.length][];
+        for ( int i = records.length; --i >= 0 ; ) { rows[i] = stringsToInts( records[i].split(delimiter) ); }
         return rows;
+  }
+
+  public static String[] fileToStringArray( final String fileName ) throws Exception {
+  	final Path p = FileSystems.getDefault().getPath(fileName);
+    final List<String> records = Files.readAllLines(p);
+    return records.toArray( new String[]{} );
   }
 
   public static int[] fileToInts( final String fileName ) throws Exception {
