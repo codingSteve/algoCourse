@@ -32,6 +32,8 @@ public class Dijkstra {
     "1 2,1", "2 3,1", "3 4,1", "4 5,1", "5 4,1"
   };
 
+  private static int[] expectation0 = new int[]{0,1,2,3,4};
+
   private static String[] testCase1 = new String[]{ 
    "1 2,1 8,2",
    "2 1,1 3,1",
@@ -43,19 +45,11 @@ public class Dijkstra {
    "8 1,2 7,1"
   };
 
+  private static int[] expectation1 = new int[]{0,1,2,3,4,4,3,2};
 
-  // expected results for testcase1  
-  /* 1 0 []
-   * 2 1 [2]
-   * 3 2 [2, 3]
-   * 4 3 [2, 3, 4]
-   * 5 4 [2, 3, 4, 5]
-   * 6 4 [8, 7, 6]
-   * 7 3 [8, 7]
-   * 8 2 [8]
-   */
 
-  private static String[][] testCases = new String[][]{testCase0, testCase1};
+  private static String[][] testCases = new String[][]{ testCase0,    testCase1    };
+  private static int[][]    expectations = new int[][]{ expectation0, expectation1 };
 
 
   private static boolean _quiet = true;
@@ -63,7 +57,9 @@ public class Dijkstra {
 
   private static Map<Integer, Node> nodes = new HashMap<>();
 
-  public static void main( final String[] ARGV ){
+  public static void main( final String[] ARGV ) throws Exception {
+    int times = 1;
+
     for ( int i = 0; i < ARGV.length ; i++  ) { 
       if ( "--loud".equals( ARGV[i] )) { 
         _quiet = true; _loud  = true;
@@ -75,11 +71,40 @@ public class Dijkstra {
         _quiet = false ; _loud = false ; 
       }
 
+      if ("--times".equals( ARGV[i] ) ) { 
+        times = Integer.valueOf(ARGV[++i]).intValue();
+      }
+
       if ( "--test".equals( ARGV[i] )) { 
-        for ( int j = testCases.length ; --j >= 0 ; ) { 
-          nodes.clear();
-          timeAndCheck(testCases[j], null);
+        if ( _loud ) System.out.println( "About to run tests " + times + " time(s).");
+
+        while ( times-- >= 1 ) { 
+          
+          for ( int j = testCases.length ; --j >= 0 ; ) { 
+            if ( _loud ) System.out.println("About to run test case " + j);
+            nodes.clear();
+            timeAndCheck(testCases[j], expectations[j]);
+          }
         }
+        times = 1;
+      }
+      else if ( "--file".equals( ARGV[i] ) ) { 
+        String fileName = ARGV[++i];
+        String[] rawInput = Utils.fileToStringArray( fileName );
+        if ( _loud ) Utils.logStrings( rawInput );
+
+        if ( _loud ) System.out.println( "About to process files " + times + " time(s).");
+        while ( times-- >= 1 ) { 
+          nodes.clear();
+          int[] pathLengths = timeAndCheck( rawInput, null ); // no expectations for an input file.
+          System.out.print("Specific nodes: [");
+          for ( int j = 0 ; j < DESTINATION_NODES .length ; j++ ) { 
+            System.out.print( pathLengths[DESTINATION_NODES[j] - 1 ]);
+            System.out.print(',');
+          }
+          System.out.println("]");
+        }
+        times = 1 ;
       }
     }
   }
@@ -87,7 +112,7 @@ public class Dijkstra {
   public static int[] timeAndCheck( String[] rawInput, int[] expectation ) { 
       Node[] graph = parseInput( rawInput );
 
-      Utils.logObjects( (Object[]) graph);
+      if ( _loud ) Utils.logObjects( (Object[]) graph);
 
       long start = System.nanoTime();
 
@@ -95,9 +120,19 @@ public class Dijkstra {
 
       long duration = System.nanoTime() - start;
 
-      if ( _quiet ) {
-        System.out.print( "Runtime " + (duration / 1000 ) + "µs finding paths: " );
-        Utils.logInts(shortestPaths);
+
+      System.out.println( "Runtime " + (duration / 1000 ) + "µs finding paths." );
+      System.out.print("result     : "); Utils.logInts(shortestPaths);
+
+
+      if (expectation != null ){ 
+        System.out.print("expectation: "); Utils.logInts( expectation );
+        System.out.print("Passed?    : ");
+        boolean passed  = true; 
+        for ( int i = expectation.length ; --i >= 0 && passed ; ) { 
+          passed &= shortestPaths[i] == expectation[i];
+        }
+        System.out.println(passed);
       }
 
       return shortestPaths ; // new int[]{MAX_PATH, MAX_PATH, MAX_PATH, MAX_PATH, MAX_PATH, 
@@ -148,7 +183,7 @@ public class Dijkstra {
     Node[] parsed = new Node[rawInput.length];
 
     for ( int n = rawInput.length ; --n >= 0 ;  ){
-      String[] tokens = rawInput[n].split(" ");
+      String[] tokens = rawInput[n].split("[ \t]");
       Integer nodeID = Integer.valueOf(tokens[0]);
 
       Node tail = nodes.get(nodeID);
