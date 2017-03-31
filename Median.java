@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Median {
 
 
@@ -19,15 +21,40 @@ public class Median {
   public static void main ( String[] ARGV ) { 
   }
 
+  private static Comparator<Integer> reversedIntegerComparator = new Comparator<Integer>() { 
+    @Override
+    public int compare( Integer a, Integer b ) { 
+      return -1 * ( b.compareTo( a ) );
+    }
+  };
+
 
   public static int[] median( int[] input ) { 
+    PriorityQueue<Integer> lower = new PriorityQueue(input.length /2, reversedIntegerComparator );
+    PriorityQueue<Integer> upper = new PriorityQueue(input.length /2 );
+
     for (int i = 0 ; i < input.length ; i ++ ) { 
-      // if intput[i] < max of the lower heap add to lower heap
-      // if intput[i] > min of the upper heap add to upper heap
+      if ( lower.size() == 0 && upper.size() == 0 ) {
+        lower.offer( input[i] );
+      }
+      else if ( input[i] < lower.peek().intValue() ) { 
+        lower.offer( input[i] );
+      }
+      else if ( input[i] > upper.peek().intValue() ) { // TODO: NPE
+        upper.offer(input[i]);
+      }
+
       // if heaps are imbalanced  rebalance heaps
+      while ( lower.size() - upper.size() > 1 ) upper.offer( lower.poll() ); 
+      while ( upper.size() - lower.size() > 1 ) lower.offer( upper.poll() ); 
+
+
       // if heaps have equal size the median is i/2 order stat
       // if heaps have unequal size then the median is the (i+1)/2 order stat
+
+
     }
+    return new int[]{};
   }
 
 
