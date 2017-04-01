@@ -2,11 +2,13 @@
 
 public class IntHeap {
 
+  boolean _loud = false;
+
   public static void main( final String[] ARGV ) { 
     IntHeap h = new IntHeap();
     for ( int i = 5 ; --i >= 0 ; ) {
       h.offer( i ) ;
-      System.out.println( h.toString() );
+      System.out.format( h.toString() + " %d %n", h.size());
     }
 
     while ( ! h.isEmpty() ) {
@@ -14,8 +16,8 @@ public class IntHeap {
     }
   }
 
-  private int[] elements;
-  private int   firstEmptySlot = 1 ; 
+  protected int[] elements;
+  protected int   firstEmptySlot = 1 ; 
 
   public IntHeap( final int size ) {
     elements = new int[size];
@@ -27,7 +29,7 @@ public class IntHeap {
     int result = elements[1];
     firstEmptySlot--;
     swap( firstEmptySlot, 1, elements );
-    bubbleDown( 1, elements, firstEmptySlot );
+    bubbleDown( 1 );
     return result;
   }
 
@@ -42,20 +44,20 @@ public class IntHeap {
       this.elements = ne;
     }
 
-    elements[firstEmptySlot] = element;
-    bubbleUp(firstEmptySlot++, elements, firstEmptySlot );
+    elements[firstEmptySlot++] = element;
+    bubbleUp( firstEmptySlot-1 );
   }
 
-  private final void bubbleUp( int position, int[] elements, int firstEmptySlot ) { 
-    while ( position > 1 && invalidHeap( position >> 1, elements, firstEmptySlot  ) ) { 
+  private final void bubbleUp( int position )  { 
+    while ( position > 1 && invalidHeap( position >> 1 ) ) { 
       int parent = position >> 1;
       swap( position, parent, elements);
       position = parent;
     }
   }
 
-  private final void bubbleDown( int position, int[] elements, int firstEmptySlot ) {
-    while( position < firstEmptySlot && invalidHeap( position, elements, firstEmptySlot) ) { 
+  private final void bubbleDown( int position ) {
+    while( invalidHeap( position ) ) { 
       int targetPosition = targetPosition( position, elements );
       swap(position, targetPosition, elements) ;
       position = targetPosition;
@@ -63,25 +65,17 @@ public class IntHeap {
     }
   }
 
-  private final boolean invalidHeap( int parent, int[] elements, int firstEmptySlot ) { 
+  private final boolean invalidHeap( int parent ) { 
     int child1 = parent << 1;
     int child2 = child1 + 1; 
 
-    final boolean noChildNodes = ( child1 >= firstEmptySlot );
-    final boolean oneChildNode = ( child2 >= firstEmptySlot );
+    final boolean heapPropertyForChild1 = ( child1 < firstEmptySlot ) ? heapProperty( parent, child1 ) : true;
+    final boolean heapPropertyForChild2 = ( child2 < firstEmptySlot ) ? heapProperty( parent, child2 ) : true;
 
-    final boolean heapPropertyForChild1 = heapProperty( parent, child1, elements );
-    final boolean heapPropertyForChild2 = heapProperty( parent, child2, elements );
-
-    return !(
-          noChildNodes                                       || // no children so the property holds
-          ( oneChildNode && heapPropertyForChild1 )          || // only one child node so only check that 
-          ( heapPropertyForChild1 && heapPropertyForChild2)     // two child nodes so check both 
-        );
-
+    return   ( heapPropertyForChild1 ) ? !heapPropertyForChild2 : true  ; 
   }
 
-  boolean heapProperty( int parent, int child, int[] elements ) { 
+  boolean heapProperty( int parent, int child ) { 
     return elements[ parent ] <= elements[ child ] ;
   }
 
@@ -89,22 +83,14 @@ public class IntHeap {
     int child1 = parent << 1;
     int child2 = child1 + 1; 
 
-    final boolean noChildNodes = ( child1 >= firstEmptySlot );
-    final boolean oneChildNode = ( child2 >= firstEmptySlot );
+    if      ( child1 >= firstEmptySlot ) throw new IllegalArgumentException("trying to decide on a target when there are no valid child nodes");
+    else if ( child2 >= firstEmptySlot ) return child1;
+    else                                 return chooseTarget( elements,  child1, child2 );
 
-    if ( noChildNodes) throw new IllegalArgumentException("trying to decide on a target when there are no valid child nodes");
-    else if ( oneChildNode ) return chooseTarget(elements,  child1, child1);
-    else   return chooseTarget( elements,  child1, child2 );
   }
 
   int chooseTarget( int[] elements, int child1, int child2) { 
     return ( elements[  child1 ] < elements[ child2 ]) ? child1 : child2;
-  }
-
-  private static final int minChild( final int position, int[] elements ) { 
-    return ( elements[ position <<1] < elements[ 1 + (position <<1)]) 
-      ? elements[     (position << 1)] 
-      : elements[ 1 + (position << 1)];
   }
 
   private static final  void swap ( int position1, int position2, int[] elements ) { 

@@ -79,6 +79,12 @@ public class Utils {
         return stringsToInts(numbers);
   }
 
+  public static Integer[] fileToIntegers( final String fileName ) throws Exception {
+        final Path p = FileSystems.getDefault().getPath(fileName);
+        final List<String> numbers = Files.readAllLines(p);
+        return stringsToIntegers(numbers);
+  }
+
 	public static int[] stringsToInts( final String[] strings ){
 		int[] ints = new int[strings.length];
 		for( int i = strings.length; --i >=0;) ints[i] = Integer.valueOf(strings[i]).intValue();
@@ -94,6 +100,11 @@ public class Utils {
 	public static Integer[] stringsToIntegers( final String[] strings ){
 		Integer[] integers = new Integer[strings.length];
 		for( int i = strings.length; --i >=0;) integers[i] = Integer.valueOf(strings[i]);
+		return integers;
+	}
+	public static Integer[] stringsToIntegers( final List<String> strings ){
+		Integer[] integers = new Integer[strings.size()];
+		for( int i = strings.size(); --i >=0;) integers[i] = Integer.valueOf(strings.get(i));
 		return integers;
 	}
 }

@@ -7,18 +7,14 @@ public class Median {
 
   private static int     answerSize = 10000;
 
-  private static int[] testCase0    = new int[]{1, 666, 10, 667, 100, 2, 3};
-  private static int   expectation0 = 142;
-
-
-  private static int[] testCase1    = new int[]{6331, 2793, 1640, 9290, 225, 625, 6195, 2303, 5685, 1354};
-  private static int   expectation1 = 9335;
-
-  private static int[] testCase2    = new int[]{1,4,9,5,2,3,6,7,8}; 
-  private static int   expectation2 = 30;
-
-  private static int[][] testCases    = new int[][] { testCase0   , testCase1   , testCase2    };
-  private static int[]   expectations = new int[]   { expectation0, expectation1, expectation2 };
+  private static Integer[]   testCase0    = new Integer[]{1, 666, 10, 667, 100, 2, 3};
+  private static Integer     expectation0 = 142;
+  private static Integer[]   testCase1    = new Integer[]{6331, 2793, 1640, 9290, 225, 625, 6195, 2303, 5685, 1354};
+  private static Integer     expectation1 = 9335;
+  private static Integer[]   testCase2    = new Integer[]{1,4,9,5,2,3,6,7,8}; 
+  private static Integer     expectation2 = 30;
+  private static Integer[][] testCases    = new Integer[][] { testCase0   , testCase1   , testCase2    };
+  private static Integer[]   expectations = new Integer[]   { expectation0, expectation1, expectation2 };
 
   /**
    * The goal of this problem is to implement the "Median Maintenance" algorithm. 
@@ -53,12 +49,12 @@ public class Median {
       if ( "--test".equals( ARGV[i] )) {
         boolean passed = true;
         for ( int j = testCases.length; --j >= 0 ; ) { 
-          for ( int k = times; --k >= 0 ; ) passed &= timeAndCheck(testCases[j], expectations[j] );
+          for ( int k = times; passed && --k >= 0 ; ) passed &= timeAndCheck(testCases[j], expectations[j] );
         }
       }
 
       if ( "--file".equals( ARGV[i] ) ) { 
-        int[] input = Utils.fileToInts( ARGV[++i] );
+        Integer[] input = Utils.fileToIntegers( ARGV[++i] );
         for ( int k = times ; --k >= 0 ; ) { 
           long start = System.nanoTime();
           int[] medians = median( input );
@@ -71,7 +67,7 @@ public class Median {
     }
   }
 
-  private static boolean timeAndCheck( int[] input, int expectation ) { 
+  private static boolean timeAndCheck( Integer[] input, int expectation ) { 
     long start = System.nanoTime();
     int[] medians = median( input );
     long duration = System.nanoTime() - start;
@@ -94,9 +90,9 @@ public class Median {
   };
 
 
-  public static int[] median( int[] input ) { 
-    PriorityQueue<Integer> lower = new PriorityQueue<>(input.length /2, reversedIntegerComparator );
-    PriorityQueue<Integer> upper = new PriorityQueue<>(input.length /2 );
+  public static int[] median( Integer[] input ) { 
+    IntHeap lower = new MaxIntHeap( input.length /2 );
+    IntHeap upper = new IntHeap( input.length /2 );
 
     int[] medians = new int[ input.length ];
 
@@ -104,17 +100,18 @@ public class Median {
     medians[0] = input[0];
 
     for (int i = 1 ; i < input.length ; i ++ ) { 
-      if (_loud ) System.out.format( "%d About to add %d%n", i, input[i]);
 
-      if ( input[i] < lower.peek().intValue() ) { // less than the highest "low" number
+      if ( input[i] < lower.peek() ) { // less than the highest "low" number
         lower.offer( input[i] );
       }
-      else if ( upper.isEmpty() ||  input[i] > upper.peek().intValue() ) { // greater than the lowest "high" number
+      else if ( upper.isEmpty() ||  input[i] > upper.peek() ) { // greater than the lowest "high" number
         upper.offer(input[i]);
       }
       else { // the new number falls between the two heaps.
         lower.offer( input[i] );
       }
+
+      if ( _loud ) System.out.format("%d added : %nlower: %s%nupper: %s%n", input[i], lower.toString(), upper.toString());
 
       // rebalance heaps with a preference for having more in the
       // lower heap if there's an odd number. This means we'll
@@ -124,8 +121,7 @@ public class Median {
       if ( lower.size() - upper.size() >= 1 ) upper.offer( lower.poll() ); 
       if ( upper.size() - lower.size() >= 1 ) lower.offer( upper.poll() ); 
 
-      if ( _loud ) System.out.println("Upper numbers:" + upper.toString() + " peek: " + upper.peek() );
-      if ( _loud ) System.out.println("Lower numbers:" + lower.toString() + " peek: " + lower.peek() );
+      if ( _loud ) System.out.format("%d added and balanced: %nlower: %s%nupper: %s%n", input[i], lower.toString(), upper.toString());
 
       medians[ i ] = lower.peek();
     }

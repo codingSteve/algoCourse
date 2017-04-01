@@ -23,8 +23,13 @@ public class MaxIntHeap extends IntHeap {
     }
   }
 
+  public MaxIntHeap( int size ) {
+    elements = new int[size];
+  }
+  public MaxIntHeap ( ) { this(10); }
+
   @Override
-  boolean heapProperty( int parent, int child, int[] elements ) { 
+  boolean heapProperty( int parent, int child ) { 
     return elements[ parent ] >= elements[ child ] ;
   }
 
