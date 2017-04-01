@@ -68,7 +68,6 @@ public class Median {
           System.out.format("median produced an answer of %d from %s in %d µs%n",result, ARGV[i], duration/1000);
         }
       }
-
     }
   }
 
@@ -101,13 +100,13 @@ public class Median {
 
     int[] medians = new int[ input.length ];
 
-    for (int i = 0 ; i < input.length ; i ++ ) { 
+    lower.offer( input[0] );
+    medians[0] = input[0];
+
+    for (int i = 1 ; i < input.length ; i ++ ) { 
       if (_loud ) System.out.format( "%d About to add %d%n", i, input[i]);
 
-      if ( lower.isEmpty() && upper.isEmpty() ) {
-        lower.offer( input[i] );
-      }
-      else if ( input[i] < lower.peek().intValue() ) { // less than the highest "low" number
+      if ( input[i] < lower.peek().intValue() ) { // less than the highest "low" number
         lower.offer( input[i] );
       }
       else if ( upper.isEmpty() ||  input[i] > upper.peek().intValue() ) { // greater than the lowest "high" number
