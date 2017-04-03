@@ -2,3 +2,6 @@
 *.class
 *.sublime-workspace
 SCC.txt
+*.out
+*.log
+dijkstraData.txt
