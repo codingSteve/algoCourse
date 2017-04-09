@@ -24,14 +24,30 @@ public class Utils {
 		System.out.println(']');
 	}
 
+	public static void logObjects( Collection c ) { 
+    System.out.print('[');
+    int i = 0 ;
+    if( c != null ) {
+      for ( Object o : c ) { 
+        if ( i++ < _loopMax ) {
+          System.out.print( o.toString() );
+          System.out.print(',');
+        }
+        else { System.out.print("…");  break ; } 
+      }
+    }
+    System.out.println(']');
+  }
 	public static void logObjects( Object... objs ){
 		System.out.print('[');
 		int i = 0 ; 
-		for ( ; i < objs.length && i< _loopMax ; i++ ) { 
-			System.out.print(objs[i].toString());
-			System.out.print(',');
-		}
-		if ( i == _loopMax ) System.out.print("…");
+    if ( objs != null ) { 
+		  for ( ; i < objs.length && i< _loopMax ; i++ ) { 
+			  if ( objs[i] != null ) System.out.print(objs[i].toString());
+			  System.out.print(',');
+		  }
+		  if ( i == _loopMax ) System.out.print("…");
+    }
 		System.out.println(']');
 	}
 
@@ -85,6 +101,12 @@ public class Utils {
         return stringsToIntegers(numbers);
   }
 
+  public static Long[] fileToReferenceLongs( final String fileName ) throws Exception {
+        final Path p = FileSystems.getDefault().getPath(fileName);
+        final List<String> numbers = Files.readAllLines(p);
+        return stringsToReferenceLongs(numbers);
+  }
+
 	public static int[] stringsToInts( final String[] strings ){
 		int[] ints = new int[strings.length];
 		for( int i = strings.length; --i >=0;) ints[i] = Integer.valueOf(strings[i]).intValue();
@@ -106,5 +128,10 @@ public class Utils {
 		Integer[] integers = new Integer[strings.size()];
 		for( int i = strings.size(); --i >=0;) integers[i] = Integer.valueOf(strings.get(i));
 		return integers;
+	}
+	public static Long[] stringsToReferenceLongs( final List<String> strings ){
+		Long[] longs = new Long[strings.size()];
+		for( int i = strings.size(); --i >=0;) longs[i] = Long.valueOf(strings.get(i));
+		return longs;
 	}
 }

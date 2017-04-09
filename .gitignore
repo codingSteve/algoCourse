@@ -5,3 +5,5 @@ SCC.txt
 *.out
 *.log
 dijkstraData.txt
+Median.txt
+2sum.txt
