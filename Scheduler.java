@@ -49,7 +49,17 @@ Inputs will look like this
     for ( int i = 0 ; i < ARGV.length; i++ ) {
       if( "--loud".equals(ARGV[i++])) _loud = true;
 
-      if( "--test".equals(ARGV[i])) {
+      
+      if ( "--file".equals( ARGV[i] ) ) {
+        int[][] rawInput = Utils.fileToRaggedArrayOfInts( ARGV[ ++i ] );
+        long start = System.nanoTime();
+        int weightedCompletionTime = schedule( rawInput );
+        long duration = System.nanoTime() - start;
+        System.out.format( "File %s produced %d in %dμs%n", ARGV[ i ], weightedCompletionTime, ( duration / 1000) );
+        
+      }
+      
+      else if( "--test".equals(ARGV[i])) {
         for ( int j = testCases.length; --j >= 0 ; ) {
           long start = System.nanoTime();
           int avgWeightedCompletionTime = schedule( testCases[j] );
