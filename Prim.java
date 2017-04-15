@@ -52,10 +52,13 @@ public class Prim {
   
 
   private static int[][] testCase3      = new int[][] {{ 6, 10 } , {1, 2, 6,}, {1, 4, 5,}, {1, 5, 4,}, {2, 4, 1,}, {2, 5, 2,}, {2, 3, 5,}, {2, 6, 3,}, {3, 6, 4,}, {4, 5, 2,}, {5, 6, 4,}};
-  private static long    expectation3   = 14L; // This is from Algorithms ("DPV") page 139:
+  private static long    expectation3   = 14L; // This is from Algorithms "DPV" page 139:
 
-  private static int[][][] testCases    = new int[][][] { testCase0   , testCase1    , testCase2    , testCase3    };
-  private static long[]    expectations = new long[]    { expectation0, expectation1 , expectation2 , expectation3 };
+  private static int[][] testCase4      = new int[][] {{3, 2}, {1,2,1<<30}, {2,3,1<<30}};
+  private static long    expectation4   = (1L<<30) + (1L<<30); // simple pipe cleaner for long paths
+
+  private static int[][][] testCases    = new int[][][] { testCase0   , testCase1    , testCase2    , testCase3    , testCase4    };
+  private static long[]    expectations = new long[]    { expectation0, expectation1 , expectation2 , expectation3 , expectation4 };
 
   private static boolean _loud = false;
 
@@ -106,7 +109,7 @@ public class Prim {
         tail  = new Node(tailID); nodes.put( tailID, tail);
       }
 
-      // if ( _loud ) System.out.format("Created edge %s %n", e.toString());
+      if ( _loud ) System.out.format("Created edge %s %n", new Edge(head, tail, input[i][2]) );
 
       head._edges.add( new Edge(head, tail, input[i][2]) );
       tail._edges.add( new Edge(tail, head, input[i][2]) );
