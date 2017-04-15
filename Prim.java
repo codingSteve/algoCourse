@@ -49,7 +49,6 @@ public class Prim {
 
   private static int[][] testCase2      = new int[][] {{ 4, 5 } , { 1, 2, 1 } , { 2, 4, 2 } , { 3, 1, 4 } , { 4, 3, 5 } , { 4, 1, 3 } ,};
   private static long    expectation2   = 7L; // from https://www.coursera.org/learn/algorithms-greedy/discussions/weeks/1/threads/vZmiuf_9EeaJEAqoFc7ZZA
-  
 
   private static int[][] testCase3      = new int[][] {{ 6, 10 } , {1, 2, 6,}, {1, 4, 5,}, {1, 5, 4,}, {2, 4, 1,}, {2, 5, 2,}, {2, 3, 5,}, {2, 6, 3,}, {3, 6, 4,}, {4, 5, 2,}, {5, 6, 4,}};
   private static long    expectation3   = 14L; // This is from Algorithms "DPV" page 139:
@@ -62,13 +61,26 @@ public class Prim {
 
   private static boolean _loud = false;
 
-  public static void main( final String[] ARGV ) { 
+  public static void main( final String[] ARGV ) throws Exception { 
 
     int times = 1;
 
     for ( int i = 0 ; i < ARGV.length ; i ++ ) { 
-      if ("--times".equals(ARGV[i])) times = Integer.valueOf( ARGV[++i] ).intValue();
-      if ("--loud".equals( ARGV[i])) _loud = true;
+      if ("--times".equals(ARGV[i])) times = Integer.valueOf( ARGV[i+1] ).intValue();
+      
+      else if ( "--file".equals( ARGV[i] )) { 
+        int[][] rawInput = Utils.fileToRaggedArrayOfInts( ARGV[ i+1 ], " " );
+        for ( int k = times ; --k >=0 ; ) {
+            Node n = prepareGraph( rawInput );
+            long start = System.nanoTime();
+            long mstCost = mst( rawInput[0][0], rawInput[0][1], n);
+            long duration = System.nanoTime() - start;
+
+            System.out.format("File %s, run %4d calculated a cost of %10d in %6dµs%n", 
+              ARGV[ i+1 ], k, mstCost, duration /1000);
+          }
+      }
+      else if ("--loud".equals( ARGV[i])) _loud = true;
       else if ("--test".equals( ARGV[i] )){
         boolean allPassed = true;
         for ( int j = testCases.length ; --j >= 0 && allPassed ;  ) {
@@ -76,7 +88,10 @@ public class Prim {
           for ( int k = times ; --k >=0 ; ) {
             Node n = prepareGraph( testCases[ j ] );
             long start = System.nanoTime();
-            long mstCost = mst( testCases[j][0][0], testCases[j].length, n);
+            if ( _loud ) System.out.format( "About to process a graph of %d node(s) and %d edge(s)%n", 
+              testCases[j][0][0], testCases[j][0][1] );
+
+            long mstCost = mst( testCases[j][0][0], testCases[j][0][1], n);
             long duration = System.nanoTime() - start;
 
             allPassed = (mstCost == expectations[j]);
@@ -137,7 +152,7 @@ public class Prim {
    */
   public static long mst ( int nodeCount, int edgeCount, Node startNode ) {
 
-    PriorityQueue<Edge> nextEdges = new PriorityQueue<Edge>( edgeCount / nodeCount * 2);
+    PriorityQueue<Edge> nextEdges = new PriorityQueue<Edge>( nodeCount * 2);
 
     nextEdges.addAll( startNode.getEdges() );
     startNode._explored = true;
@@ -158,8 +173,6 @@ public class Prim {
         exploredNodeCount++;
       }
     }
-
-
 
     return totalCost;
   }
