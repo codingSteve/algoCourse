@@ -108,9 +108,14 @@ Inputs will look like this
   private static long    diffExpectation4  = (10 * 9) + (2*10);  // the difference on these weights is the same so we should use the weight as a tie breaker
   private static long    ratioExpectation4 = ( 2 * 1) + (10*10); // the ratio is not the same though
 
-  private static int[][][] testCases         = new int[][][]{ testCase0        , testCase1        , testCase2         , testCase4        , testCase3         }; 
-  private static long[]    diffExpectations  = new long[]   { diffExpectation0 , diffExpectation1 , diffExpectation2  , diffExpectation4 , diffExpectation3  };
-  private static long[]    ratioExpectations = new long[]   { ratioExpectation0, ratioExpectation1, ratioExpectation2 , ratioExpectation4, ratioExpectation3  };
+  private static int[][] testCase5         = new int[][]{ {2,0}, {1<<30, 2}, { 100, 1}};
+  private static long    diffExpectation5  = ( 1L << 31 ) + (100 * 3 );
+  private static long    ratioExpectation5 = ( 1L << 31 ) + (100 * 3 );
+
+
+  private static int[][][] testCases         = new int[][][]{ testCase0        , testCase1        , testCase2         , testCase3         , testCase4        , testCase5         }; 
+  private static long[]    diffExpectations  = new long[]   { diffExpectation0 , diffExpectation1 , diffExpectation2  , diffExpectation3  , diffExpectation4 , diffExpectation5  };
+  private static long[]    ratioExpectations = new long[]   { ratioExpectation0, ratioExpectation1, ratioExpectation2 , ratioExpectation3 , ratioExpectation4, ratioExpectation5 };
 
   private static boolean           _loud       = false;
   private static int               _times      = 1;
