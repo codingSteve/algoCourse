@@ -1,11 +1,6 @@
 
 *.class
 *.sublime-workspace
-SCC.txt
 *.out
 *.log
-dijkstraData.txt
-Median.txt
-2sum.txt
-jobs.txt
-edges.txt
+*.txt
