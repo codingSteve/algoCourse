@@ -9,8 +9,6 @@ Full list available for hotspot on [Oracle's website](http://docs.oracle.com/jav
     
 
     time java -d64 -server                   \
-              -XX:+UnlockDiagnosticVMOptions \
-              -XX:+PrintInlining             \
               -XX:+PrintCompilation          \
               -XX:+PrintGCTimeStamps         \
               -cp .                          \
