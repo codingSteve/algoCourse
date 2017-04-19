@@ -8,13 +8,16 @@ import java.util.*;
 public class Node {
     final int _nodeID;
     Node _leader;
+    List<Node> _followers;
 
-    boolean _explored      = false;
+    boolean _explored       = false;
     Collection<Edge> _edges = new ArrayList<>();
 
     Node( int nodeID ) { 
       _nodeID = nodeID;
       _leader = this;
+      _followers = new LinkedList<Node>();
+      _followers.add( this ); 
     }
 
     Collection<Edge> getEdges() {
@@ -23,7 +26,7 @@ public class Node {
 
     @Override
     public String toString() { 
-      return "{" + _nodeID + ",[" + _edges.toString() + ']';
+      return "{ID: " + _nodeID + ", leader:"+_leader._nodeID +", edges: [" + _edges.toString() + "]}";
     }
 
     @Override
