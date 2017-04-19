@@ -7,12 +7,14 @@ import java.util.*;
 */
 public class Node {
     final int _nodeID;
+    Node _leader;
 
     boolean _explored      = false;
     Collection<Edge> _edges = new ArrayList<>();
 
     Node( int nodeID ) { 
       _nodeID = nodeID;
+      _leader = this;
     }
 
     Collection<Edge> getEdges() {
