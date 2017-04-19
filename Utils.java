@@ -39,6 +39,15 @@ public class Utils {
       return d;
   }
 
+  public static int bitsToInt( final String[] bits ){
+  	int result = 0 ; 
+  	for (int i = 0 ; i <bits.length ; i ++ ) { 
+  		result <<= 1;
+  		result += ((int)bits[i].charAt(0))-48;
+  	}
+  	return result;
+  }
+
 
   public static void logRaggedInts( int[]... twoDimensionalArray ) {
     int i = 0;
