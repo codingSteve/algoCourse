@@ -11,7 +11,16 @@ Full list available for hotspot on [Oracle's website](http://docs.oracle.com/jav
     time java -d64 -server                   \
               -XX:+PrintCompilation          \
               -XX:+PrintGCTimeStamps         \
+              -Xmx8G                         \
               -cp .                          \
-              Scheduler --times 5 --test
+              Kruksal --times 5 --test       \
+                      --times 1 --hamFile clustering_big.txt
+
+    time java -d64 -server                   \
+              -Xmx8G                         \
+              -XX:+PrintGCTimeStamps         \
+              -cp .                          \
+              Kruksal --times 5 --test       \
+                      --times 1 --hamFile clustering_big.txt
 
 

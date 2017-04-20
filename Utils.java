@@ -39,11 +39,11 @@ public class Utils {
       return d;
   }
 
-  public static int bitsToInt( final String[] bits ){
+  public static int bitsToInt( final int[] bits ){
   	int result = 0 ; 
   	for (int i = 0 ; i <bits.length ; i ++ ) { 
   		result <<= 1;
-  		result += ((int)bits[i].charAt(0))-48;
+  		result += bits[i];
   	}
   	return result;
   }
@@ -128,6 +128,8 @@ public class Utils {
         for ( int i = records.length; --i >= 0 ; ) { rows[i] = stringsToInts( records[i].split(delimiter) ); }
         return rows;
   }
+
+
 
   public static String[] fileToStringArray( final String fileName ) throws Exception {
   	final Path p = FileSystems.getDefault().getPath(fileName);

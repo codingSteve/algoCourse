@@ -20,13 +20,50 @@ public class Kruksal {
 
   private static boolean _loud = false;
 
+
+  public static final Comparator<Node> weightedComparator =new Comparator<Node>() { 
+    @Override
+    public int compare( Node a, Node b ) {
+      if ( a._featureSet == b._featureSet ) return a._nodeID - b._nodeID;
+      return a._featureSet - b._featureSet;
+    }
+  };
+
   public static void main( String[] ARGV ) throws Exception {
 
     int times = 1;
 
     for ( int i = 0 ; i < ARGV.length ; i ++ ) { 
       if ("--times".equals(ARGV[i])) times = Integer.valueOf( ARGV[i+1] ).intValue();
-      
+      else if ( "--hamFile".equals( ARGV[i])){
+        long fileLoadStart = System.nanoTime();
+        int[][] rawInput = Utils.fileToRaggedArrayOfInts ( ARGV[ i + 1], " " );
+        System.out.format("File %s has %d edges%n", ARGV[ i+ 1 ], rawInput.length-1);
+        int[] featureSet = new int[ rawInput.length ];
+
+        for ( int j = rawInput.length ; --j >= 1 ; ){
+          featureSet[j] = Utils.bitsToInt( rawInput[j] );
+        }
+        System.out.format("File %s preprocessed to integers%n", ARGV[ i+1 ]);
+        Utils.logInts( featureSet );
+        
+        PriorityQueue<Node> sortedNodes = new PriorityQueue<>( weightedComparator );
+        Map<Integer, Node>  nodes = new HashMap<>( featureSet.length );
+
+        long edgeGenertionStart = System.nanoTime();
+        int edgeCount = 0 ;
+        for ( int j = featureSet.length ; --j >= 1 ; ) { 
+          Node jNode = new Node( j );
+          jNode._featureSet = featureSet[j];
+          sortedNodes.offer( jNode );
+
+        }
+        for ( int j = 0 ; j < 20 ; j ++ ){
+          System.out.println ( sortedNodes.poll().toString() ); 
+        }
+
+
+      }
       else if ( "--file".equals( ARGV[i] )) { 
         int[][] rawInput = Utils.fileToRaggedArrayOfInts( ARGV[ i+1 ], " " );
         System.out.format("File %s has %d edges%n", ARGV[ i+1], rawInput.length -1 );
@@ -97,9 +134,16 @@ public class Kruksal {
         }
       }
     }
+  }
 
+  public static Node getNode( Integer nodeID, Map<Integer, Node> nodes ) { 
+    Node n = nodes.get( nodeID );
 
-
+    if ( n == null ) {
+      n = new Node( nodeID );
+     nodes.put( nodeID, n);
+    }
+    return n;
   }
 
    public static Map<Integer, Node> prepareGraph( int[][] input, PriorityQueue<Edge> edges ) { 
@@ -110,17 +154,8 @@ public class Kruksal {
       int headID = input[i][0];
       int tailID = input[i][1];
 
-      Node head = nodes.get( headID );
-      Node tail = nodes.get( tailID );
-
-      if ( head == null ) {
-        head = new Node( headID );
-        nodes.put( headID, head);
-      }
-
-      if (tail == null ) {
-        tail  = new Node(tailID); nodes.put( tailID, tail);
-      }
+      Node head = getNode( headID, nodes );
+      Node tail = getNode( tailID, nodes );
 
       edges.offer( new Edge(head, tail, input[i][2]) );
 

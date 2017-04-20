@@ -1,4 +1,9 @@
 public class Scratch {
+
+    public static void main( String[] ARGV){
+        Utils.logStrings( ARGV );
+        Utils.logInts( Utils.bitsToInt( ARGV ));
+    }
 	/** Routine to count the different bits between two integers.
 	*
     * This is taken from Wikipedia, it's shorter and will execute the loop

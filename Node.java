@@ -5,9 +5,10 @@ import java.util.*;
 *
 * 
 */
-public class Node {
+public class Node implements Comparable<Node> {
     final int _nodeID;
     Node _leader;
+    int  _featureSet = 0;
     List<Node> _followers;
 
     boolean _explored       = false;
@@ -25,8 +26,13 @@ public class Node {
     }
 
     @Override
+    public int compareTo( Node other ){
+      return this._nodeID - other._nodeID;
+    }
+
+    @Override
     public String toString() { 
-      return "{ID: " + _nodeID + ", leader:"+_leader._nodeID +", edges: [" + _edges.toString() + "]}";
+      return "{ID: " + _nodeID + ", leader:"+_leader._nodeID +", _featureSet = " + _featureSet + ", edges: [" + _edges.toString() + "]}";
     }
 
     @Override

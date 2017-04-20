@@ -19,7 +19,7 @@ ADVICE: If you're not getting the correct answer, try debugging your algorithm u
 
 ##Q2 
 
-In this question your task is again to run the clustering algorithm from lecture, but on a MUCH bigger graph. So big, in fact, that the distances (i.e., edge costs) are only defined implicitly, rather than being provided as an explicit list.
+In this question your task is again to run the clustering algorithm from lecture, but on a *MUCH* bigger graph. So big, in fact, that the distances (i.e., edge costs) are only defined implicitly, rather than being provided as an explicit list.
 
 The format is:
 
@@ -51,47 +51,9 @@ The distance between two nodes u and v in this problem is defined as the Hamming
         return distance;
     }
 
+*The question is*: what is the largest value of k such that there is a k-clustering with spacing at least 3? That is, how many clusters are needed to ensure that no pair of nodes with all but 2 bits in common get split into different clusters?
 
-    z        = 1 0 1 0 
-    z-1      = 1 0 0 1
-    z &= z-1 = 1 0 0 0  
-    z-1      = 0 1 1 1 
-    z &= z-1 = 0 0 0 0        
+NOTE: The graph implicitly defined by the data file is so big that you probably can't write it out explicitly, let alone sort the edges by cost. So you will have to be a little creative to complete this part of the question. 
 
-    z        = 1 1 1 1 
-    z -1     = 1 1 1 0 
-    AND      = 1 1 1 0 
-    z-1      = 1 1 0 1 
-    AND      = 1 1 0 0 
-    z-1      = 1 0 1 1 
-    AND      = 1 0 0 0 
-    Z-1      = 0 1 1 1
-    AND      = 0 0 0 0 
-    …
-
-    /** 
-    *
-    * Hamming distance: {@link https://en.wikipedia.org/wiki/Hamming_distance}
-    */
-    public static int hamDistance( final int x, final int y ) {
-        int z = (x ^ y);
-        int distance = 0 ;
-        while ( z != 0 ) {
-            distance += ( z & 1 );
-            z >>=1 ;
-        }
-        return distance;
-    }
-
-
-    z        = 1 0 1 0 
-    z      >>= 0 1 0 1
-    z      >>= 0 0 1 0 
-    z      >>= 0 0 0 1 
-
-
-
-The question is: what is the largest value of k such that there is a k-clustering with spacing at least 3? That is, how many clusters are needed to ensure that no pair of nodes with all but 2 bits in common get split into different clusters?
-
-NOTE: The graph implicitly defined by the data file is so big that you probably can't write it out explicitly, let alone sort the edges by cost. So you will have to be a little creative to complete this part of the question. For example, is there some way you can identify the smallest distances without explicitly looking at every pair of nodes?
+*For example*, is there some way you can identify the smallest distances without explicitly looking at every pair of nodes?
 
