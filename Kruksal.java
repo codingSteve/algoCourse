@@ -29,6 +29,7 @@ public class Kruksal {
     }
   };
 
+
   public static void main( String[] ARGV ) throws Exception {
 
     int times = 1;
@@ -38,30 +39,90 @@ public class Kruksal {
       else if ( "--hamFile".equals( ARGV[i])){
         long fileLoadStart = System.nanoTime();
         int[][] rawInput = Utils.fileToRaggedArrayOfInts ( ARGV[ i + 1], " " );
-        System.out.format("File %s has %d edges%n", ARGV[ i+ 1 ], rawInput.length-1);
+        System.out.format("File %s has %d edges, loaded in %10dµs%n", ARGV[ i+ 1 ], rawInput.length-1, (System.nanoTime() - fileLoadStart)/1000);
         int[] featureSet = new int[ rawInput.length ];
 
         for ( int j = rawInput.length ; --j >= 1 ; ){
           featureSet[j] = Utils.bitsToInt( rawInput[j] );
         }
         System.out.format("File %s preprocessed to integers%n", ARGV[ i+1 ]);
-        Utils.logInts( featureSet );
-        
-        PriorityQueue<Node> sortedNodes = new PriorityQueue<>( weightedComparator );
-        Map<Integer, Node>  nodes = new HashMap<>( featureSet.length );
 
-        long edgeGenertionStart = System.nanoTime();
+        final Map<Integer, List<Node>>  nodes = new HashMap<>( featureSet.length ); // feature sets are non-unique
+
+        FeatureSetGenerator.IntPredicate exists = new FeatureSetGenerator.IntPredicate(){
+          @Override
+          public boolean test( int n) {
+            return nodes.get( Integer.valueOf( n ) ) != null;
+          }
+        };
+
         int edgeCount = 0 ;
         for ( int j = featureSet.length ; --j >= 1 ; ) { 
           Node jNode = new Node( j );
           jNode._featureSet = featureSet[j];
-          sortedNodes.offer( jNode );
-
-        }
-        for ( int j = 0 ; j < 20 ; j ++ ){
-          System.out.println ( sortedNodes.poll().toString() ); 
+          addNode( jNode._featureSet, jNode, nodes );
         }
 
+        int clusters    = rawInput[0][0];
+        final int width = rawInput[0][1];
+        
+        long clusteringStart = System.nanoTime();
+        CLUSTERING:
+        for( int j = featureSet.length ; --j >= 1 ; ){
+          
+          int feature       = featureSet[j];
+          int[] neighbours  = FeatureSetGenerator.allNeighbours( feature, 2, width );
+          List<Node> locals = nodes.get( feature );
+
+          for ( Node head : locals ) {
+          
+            CONSUMING_NEIGHBOURS:
+            for( int n : neighbours ) {
+              List<Node> localTails = nodes.get( n ); 
+
+              if ( localTails == null ) continue CONSUMING_NEIGHBOURS; // no node available with this feature set
+
+              for ( Node tail : localTails ) {
+                if ( head._leader == tail._leader ) continue CONSUMING_NEIGHBOURS; // already clustered so skip
+
+                union( head, tail );
+                clusters--; 
+                if ( _loud ) 
+                  System.out.format("Node ID %d with featureSet %10d found a neighbour %10d, distance == %3d (clusters == %d)  %s %n", 
+                                    head._nodeID, feature, n, Utils.hamDistance( feature, n), clusters, head._leader
+                                    );
+              }
+            }
+          }
+        }
+
+        if (_loud ){
+          for( Map.Entry<Integer, List<Node>> d : nodes.entrySet() ){ 
+            int minSeparation = width;
+
+            List<Node> locals = d.getValue();
+
+            for ( Node n1 : locals ) { 
+
+              if ( n1 != n1._leader) continue;
+
+              for( Map.Entry<Integer, List<Node>> e : nodes.entrySet() ){ 
+                List<Node> locals2 = e.getValue();
+
+                for ( Node n2 : locals2 ){
+                  if ( n1._leader == n2._leader ) continue;
+                  int distance = Utils.hamDistance( n1._featureSet, n2._featureSet );
+                  if (distance < minSeparation ) minSeparation = distance;
+                }
+              }
+
+              if ( minSeparation < 3 ) System.out.format("(%s ):  %d%n", n1, minSeparation);
+            }
+          } 
+        }
+
+
+        System.out.format( "Clustered data into %d clusters in %10dµs%n", clusters, (System.nanoTime() - clusteringStart)/1000 );
 
       }
       else if ( "--file".equals( ARGV[i] )) { 
@@ -74,7 +135,7 @@ public class Kruksal {
             long preprocessDuration = System.nanoTime() - preprocessStart;
             System.out.format("File %s preprocessed in %6dµs%n",ARGV[ i+1],preprocessDuration/1000 );
 
-            Map<Integer,Node> nodes = prepareGraph( rawInput, edges );
+            Map<Integer,Node> nodes = prepareGraph( rawInput, edges ); // nodes keyed on ID
 
             long start = System.nanoTime();
             mst( rawInput[0][0], edges, 4);
@@ -101,7 +162,7 @@ public class Kruksal {
 
             PriorityQueue<Edge> edges = new PriorityQueue<>(testCases[j].length - 1);
 
-            Map<Integer, Node> nodes = prepareGraph( testCases[ j ], edges );
+            Map<Integer, Node> nodes = prepareGraph( testCases[ j ], edges ); // nodes keyed on id
 
             long start = System.nanoTime();
             if ( _loud ) System.out.format( "About to process a graph of %d node(s) and %d edge(s)%n", 
@@ -135,6 +196,16 @@ public class Kruksal {
       }
     }
   }
+
+  public static void addNode( int featureSet, Node n, Map<Integer, List<Node>> nodes ) { 
+    List<Node> similarNodes = nodes.get( featureSet );
+    if (similarNodes == null ) {
+      similarNodes = new LinkedList<Node>();
+      nodes.put( featureSet, similarNodes);
+    }
+    similarNodes.add(n);
+  }
+
 
   public static Node getNode( Integer nodeID, Map<Integer, Node> nodes ) { 
     Node n = nodes.get( nodeID );
@@ -188,24 +259,24 @@ private static void logEdge( Edge e ){
 }
   
 
-  private static void union( Node x, Node y ) {
+private static void union( Node x, Node y ) {
     
-    final List<Node> xFollowers = x._leader._followers;
-    final List<Node> yFollowers = y._leader._followers;
+    final List<Node> xGroup = x._leader._followers;
+    final List<Node> yGroup = y._leader._followers;
 
     final List<Node> enlisted;   
     final List<Node> recruits;   
     final Node       newLeader;  
 
-    if ( yFollowers.size() > xFollowers.size() ) {
-      enlisted  = yFollowers;
-      recruits  = xFollowers;
+    if ( yGroup.size() > xGroup.size() ) {
+      enlisted  = yGroup;
+      recruits  = xGroup;
       newLeader = y._leader;
       x._leader = y._leader;
     }
     else {
-      enlisted   = xFollowers;
-      recruits   = yFollowers;
+      enlisted   = xGroup;
+      recruits   = yGroup;
       newLeader  = x._leader;
       y._leader  = x._leader;
     }
