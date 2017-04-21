@@ -32,7 +32,15 @@ public class Node implements Comparable<Node> {
 
     @Override
     public String toString() { 
-      return "{ID: " + _nodeID + ", leader:"+_leader._nodeID +", _featureSet = " + _featureSet + ", edges: [" + _edges.toString() + "]}";
+      String followerIDs = "[";
+      for ( Node f : _followers ) followerIDs += ( f._nodeID + ",");
+      followerIDs += "]";
+
+      return "{ID: " + _nodeID  + 
+              ", l:"    + _leader._nodeID +
+              ", f: "   + _featureSet + 
+              ", fs: "  + followerIDs + 
+              "}";
     }
 
     @Override
