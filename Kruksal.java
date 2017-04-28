@@ -42,10 +42,6 @@ public class Kruksal {
         System.out.format("File %s has %d edges, loaded in %10dµs%n", ARGV[ i+ 1 ], rawInput.length-1, (System.nanoTime() - fileLoadStart)/1000);
         int[] featureSet = new int[ rawInput.length ];
 
-        for ( int j = rawInput.length ; --j >= 1 ; ){
-          featureSet[j] = Utils.bitsToInt( rawInput[j] );
-        }
-        System.out.format("File %s preprocessed to integers%n", ARGV[ i+1 ]);
 
         final Map<Integer, List<Node>>  nodes = new HashMap<>( featureSet.length ); // feature sets are non-unique
 
@@ -56,11 +52,13 @@ public class Kruksal {
           }
         };
 
-        int edgeCount = 0 ;
-        for ( int j = featureSet.length ; --j >= 1 ; ) { 
+        for ( int j = rawInput.length  ; --j >= 1 ; ) { 
+          int feature = Utils.bitsToInt( rawInput[j] );
+          featureSet[j] = feature ; 
+
           Node jNode = new Node( j );
-          jNode._featureSet = featureSet[j];
-          addNode( jNode._featureSet, jNode, nodes );
+          jNode._featureSet = feature;
+          addNode( feature, jNode, nodes );
         }
 
         int clusters    = rawInput[0][0];
@@ -83,7 +81,7 @@ public class Kruksal {
               if ( localTails == null ) continue CONSUMING_NEIGHBOURS; // no node available with this feature set
 
               for ( Node tail : localTails ) {
-                if ( head._leader == tail._leader ) continue CONSUMING_NEIGHBOURS; // already clustered so skip
+                if ( head._leader == tail._leader ) continue; // already clustered so skip
 
                 union( head, tail );
                 clusters--; 
@@ -95,32 +93,6 @@ public class Kruksal {
             }
           }
         }
-
-        if (_loud ){
-          for( Map.Entry<Integer, List<Node>> d : nodes.entrySet() ){ 
-            int minSeparation = width;
-
-            List<Node> locals = d.getValue();
-
-            for ( Node n1 : locals ) { 
-
-              if ( n1 != n1._leader) continue;
-
-              for( Map.Entry<Integer, List<Node>> e : nodes.entrySet() ){ 
-                List<Node> locals2 = e.getValue();
-
-                for ( Node n2 : locals2 ){
-                  if ( n1._leader == n2._leader ) continue;
-                  int distance = Utils.hamDistance( n1._featureSet, n2._featureSet );
-                  if (distance < minSeparation ) minSeparation = distance;
-                }
-              }
-
-              if ( minSeparation < 3 ) System.out.format("(%s ):  %d%n", n1, minSeparation);
-            }
-          } 
-        }
-
 
         System.out.format( "Clustered data into %d clusters in %10dµs%n", clusters, (System.nanoTime() - clusteringStart)/1000 );
 
