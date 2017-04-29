@@ -26,6 +26,30 @@ public class Huffman {
       if      ( "--loud".equals( ARGV[i]) ) _loud = true;
       else if ( "--quiet".equals(ARGV[i]) ) _loud = false;
       else if ( "--times".equals(ARGV[i]) ) times = Integer.valueOf( ARGV[++i] );
+      else if ( "--file".equals( ARGV[i]) ){
+        String fileName = ARGV[++i];
+        int[] rawInput = Utils.fileToInts( fileName );
+          
+        for ( int j = times ; --j >= 0; ){
+          long start    = System.nanoTime();
+          Tree result = encode ( rawInput );
+          long duration = System.nanoTime() - start;
+
+          List<String> paths = result.getPaths();
+
+          int minLength = Integer.MAX_VALUE;
+          int maxLength = Integer.MIN_VALUE;
+          for( String s : paths ) { 
+            if ( s.length() > maxLength ) maxLength = s.length(); 
+            if ( s.length() < minLength ) minLength = s.length();
+          }
+
+          System.out.format("Run %4d; file %s produced min codeword length %d and max codeword length %d expected in %6dµs%n",
+            j, fileName, minLength, maxLength, ( duration / 1000) 
+            );
+        }
+
+      }
       else if ( "--test".equals(ARGV[i])) {
         boolean allTestsPassed = true;
         for ( int j = 0 ; j < testCases.length && allTestsPassed ; j++ ){ 
