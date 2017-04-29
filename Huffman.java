@@ -23,17 +23,25 @@ public class Huffman {
   public static void main(String[] ARGV) throws Exception {
     int times = 1;
     for ( int i = 0 ; i < ARGV.length ; i++ ) {
-      if ( "--loud".equals( ARGV[i]) ) _loud = true;
+      if      ( "--loud".equals( ARGV[i]) ) _loud = true;
+      else if ( "--quiet".equals(ARGV[i]) ) _loud = false;
+      else if ( "--times".equals(ARGV[i]) ) times = Integer.valueOf( ARGV[++i] );
       else if ( "--test".equals(ARGV[i])) {
         boolean allTestsPassed = true;
         for ( int j = 0 ; j < testCases.length && allTestsPassed ; j++ ){ 
-          for( int k = times ; --k >= 0 ; ) {
+          for( int k = times ; --k >= 0 && allTestsPassed ; ) {
             long start    = System.nanoTime();
-            Tree result   = encode( testCases[j]);
+            Tree result   = encode( testCases[j] );
             long duration = System.nanoTime() - start;
 
-            int minLength = -1;
-            int maxLength = -1;
+            List<String> paths = result.getPaths();
+
+            int minLength = Integer.MAX_VALUE;
+            int maxLength = Integer.MIN_VALUE;
+            for( String s : paths ) { 
+              if ( s.length() > maxLength ) maxLength = s.length(); 
+              if ( s.length() < minLength ) minLength = s.length();
+            }
 
             allTestsPassed &= ( minLength == expectations[j][0]) && (maxLength == expectations[j][1]); 
 
@@ -54,8 +62,18 @@ public class Huffman {
     }
     if ( _loud ) System.out.format("Raw trees created as : %s %n", subTrees);
 
-    return null;
+    
+    while( subTrees.size() >= 2 ){
+      Tree t1 = subTrees.poll();  
+      Tree t2 = subTrees.poll();
+
+      subTrees.offer( new Tree( t1, t2 ));
+    }
+
+    return subTrees.poll();
   }
+
+
   private static Comparator<Tree> weightComparator = new Comparator<Tree>(){
     @Override
     public int compare( Tree a, Tree b ){
@@ -83,6 +101,16 @@ public class Huffman {
             
       return _weight;
     }
+
+    List<String> getPaths() {return getPaths(""); }
+
+    protected List<String> getPaths( String path ) { 
+      if ( _left == null ) return Arrays.asList( new String[]{path});
+      List<String> paths = _left.getPaths( path + "0");
+      paths.addAll(  _right.getPaths(path + "1"));
+      return paths;
+    }
+    
     @Override
     public String toString(){
       return "{w:" + _weight + ", v:" + _value + "}";
