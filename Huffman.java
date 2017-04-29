@@ -105,12 +105,17 @@ public class Huffman {
     List<String> getPaths() {return getPaths(""); }
 
     protected List<String> getPaths( String path ) { 
-      if ( _left == null ) return Arrays.asList( new String[]{path});
+      if ( _left == null ) {
+        LinkedList<String> paths = new LinkedList<>();
+        paths.add(path); 
+        return paths;
+      }
+
       List<String> paths = _left.getPaths( path + "0");
       paths.addAll(  _right.getPaths(path + "1"));
       return paths;
     }
-    
+
     @Override
     public String toString(){
       return "{w:" + _weight + ", v:" + _value + "}";
