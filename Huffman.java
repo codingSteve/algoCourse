@@ -46,9 +46,27 @@ public class Huffman {
     }
   }
 
+
   private static Tree encode( int[] raw ){
+    PriorityQueue<Tree> subTrees = new PriorityQueue<>( weightComparator );
+    for ( int i = raw.length ; --i >= 1 ; ){
+      subTrees.offer( new Tree( raw[i], i ));
+    }
+    if ( _loud ) System.out.format("Raw trees created as : %s %n", subTrees);
+
     return null;
   }
+  private static Comparator<Tree> weightComparator = new Comparator<Tree>(){
+    @Override
+    public int compare( Tree a, Tree b ){
+
+      int weightA = a.getWeight();
+      int weightB = b.getWeight();
+      int result  = weightA - weightB;
+      if ( result ==0 ) return a._value - b._value; // trouble here for trees with the same weight 
+      return result;  
+    }
+  };
 
   private static class Tree {
     int _weight;
@@ -64,6 +82,10 @@ public class Huffman {
         return _left.getWeight() + _right.getWeight();
             
       return _weight;
+    }
+    @Override
+    public String toString(){
+      return "{w:" + _weight + ", v:" + _value + "}";
     }
 
   }
