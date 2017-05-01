@@ -7,8 +7,11 @@ public class Knapsack {
   private static int[][]   testCase1    = new int[][]{{6,4}, {3,4}, {2,3},{4,2}, {4,3}};
   private static int       expectation1 = 8; // from the lectures
 
-  private static int[][][] testCases    = new int[][][]{ testCase0   , testCase1   , };
-  private static int[]     expectations = new int[]{     expectation0, expectation1, };
+  private static int[][]   testCase2    = new int[][]{{6, 4}, {1,2}, {1,2}, {1,2}, {100, 5}};
+  private static int       expectation2 = 100; // massive bar of gold is the final item
+
+  private static int[][][] testCases    = new int[][][]{ testCase0   , testCase1   , testCase2   , };
+  private static int[]     expectations = new int[]{     expectation0, expectation1, expectation2, };
 
   public static void main(String[] args) throws Exception {
     int times = 1;
