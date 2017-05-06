@@ -10,8 +10,17 @@ public class Knapsack {
   private static int[][]   testCase2    = new int[][]{{6, 4}, {1,2}, {1,2}, {1,2}, {100, 5}};
   private static int       expectation2 = 100; // massive bar of gold is the final item
 
-  private static int[][][] testCases    = new int[][][]{ testCase0   , testCase1   , testCase2   , };
-  private static int[]     expectations = new int[]{     expectation0, expectation1, expectation2, };
+  private static int[][]   testCase3    = new int[][]{{6, 4}, {1,2}, {1,2}, {1,2}, {1000, 7}};
+  private static int       expectation3 = 3; // a block of something very valuable but too big so we choose the items which fit
+
+  private static int[][]   testCase4    = new int[][]{{6, 4}, {1,4}, {2,4}, {3,4}, {4,4}};
+  private static int       expectation4 = 4; // we can only choose one item, so pick the best
+
+  private static int[][]   testCase5    = new int[][]{ {6,4}, {10, 2},{10, 2},{1, 6},{10, 2}, };
+  private static int       expectation5 = 30; // skip the heavy and worthless third item.
+
+  private static int[][][] testCases    = new int[][][]{ testCase0   , testCase1   , testCase2   ,  testCase3   , testCase4   , testCase5   , };
+  private static int[]     expectations = new int[]{     expectation0, expectation1, expectation2,  expectation3, expectation4, expectation5, };
 
   public static void main(String[] args) throws Exception {
     int times = 1;
@@ -26,6 +35,20 @@ public class Knapsack {
       else if ("--times".equals(args[i])) {
         times = Integer.valueOf( args[ ++ i ] );
       }
+      else if ( "--file".equals(args[i])) {
+        int[][] input = Utils.fileToRaggedArrayOfInts( args[++i], " ");
+        for (int j = times ; --j>=0 ; ) {
+          long start       = System.nanoTime();
+          int[][] solution = fill( input );
+          long duration    = System.nanoTime() - start;
+          int totalValue   = solution[input[0][1]][input[0][0]];
+
+          System.out.format("Run %2d of file %s produced value %d in %6dµs%n",
+            j, args[i], totalValue, duration /1000);
+          
+        }
+
+      }
       else if ( "--test".equals(args[i])) {
         
         TESTING:
@@ -34,29 +57,52 @@ public class Knapsack {
             long start = System.nanoTime();
 
             int[][] solution = fill( testCases[j] );
+            int totalValue   = solution[testCases[j][0][1]][testCases[j][0][0]]; // final element of the grid
+            long duration    = System.nanoTime() - start;
+
             if (_loud) { 
               System.out.println("Value solution:");
               Utils.logRaggedInts( solution );
             }
 
-            int totalValue   = solution[testCases[j][0][1]][testCases[j][0][0]]; // final element of the grid
-
-            long duration = System.nanoTime() - start;
-
-            System.out.format("Run %2d of testCase %2d produced value of %6d (expected %6d) in %6dµs%n",
+            System.out.format("Run %2d of testCase %2d with  fill produced value of %6d (expected %6d) in %6dµs%n",
               k, j, totalValue, expectations[j], duration / 1000);
 
             if (totalValue != expectations[j]) break TESTING;
-            
+
+            if (_loud) Utils.logRaggedInts(testCases[j]);
+
+            start      = System.nanoTime();
+            totalValue = rfill( testCases[j], testCases[j][0][0] , testCases[j][0][1], 0);
+            duration   = System.nanoTime() - start;
+
+            System.out.format("Run %2d of testCase %2d with rfill produced value of %6d (expected %6d) in %6dµs%n",
+              k, j, totalValue, expectations[j], duration / 1000);
+
+            if (totalValue != expectations[j]) break TESTING;
           }
           
         }
-
-        
-
-      }
-      
+      }      
     }
+  }
+
+  static int rfill ( int[][] input, int capacty, int item, int d ){
+    if ( capacty == 0 ) return 0;
+    if ( item    == 0 ) return 0;
+
+    int pb = rfill( input, capacty, item - 1, d + 1);
+
+    if ( capacty < input[item][1] ) {
+      return pb;
+    }
+
+    int ns = rfill( input, capacty - input[item][1], item - 1, d + 1) + input[item][0];
+
+    if (_loud ) System.out.format("rfill: d=%d, i=%d, c=%d, pb=%d, ns=%d%n",
+      d, item, capacty, pb, ns);
+
+    return Math.max(pb, ns);
   }
 
   static int[][] fill( int[][] input ){
@@ -66,14 +112,16 @@ public class Knapsack {
     // plus one here to line up with the input array
     int[][] solution = new int[N+1][W+1];
 
-    for( int i = 1 ; i < input.length ; i++  ){
+    for( int i = 1 ; i < solution.length ; i++  ){
       final int vi = input[i][0];
       final int wi = input[i][1];
 
+      final int[] previousColumn = solution[ i-1 ];
+
+      System.arraycopy( previousColumn, 0, solution[i], 0, previousColumn.length );
 
       for ( int x = wi ; x <= W ; x++ ) {
-
-        int[] previousColumn = solution[ i-1 ];
+        
         int previousBest     = previousColumn[x];
         int newValue         = previousColumn[x-wi] + vi;
 
@@ -82,7 +130,7 @@ public class Knapsack {
 
         solution[i][x] = Math.max( previousBest, newValue);
 
-      if ( _loud ) Utils.logRaggedInts( solution );
+        if ( _loud ) Utils.logRaggedInts( solution );
         
       }
 
