@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Knapsack {
   private static boolean _loud = false;
 
@@ -73,7 +75,7 @@ public class Knapsack {
             if (_loud) Utils.logRaggedInts(testCases[j]);
 
             start      = System.nanoTime();
-            totalValue = rfill( testCases[j], testCases[j][0][0] , testCases[j][0][1], 0);
+            totalValue = rfill( testCases[j], testCases[j][0][0] , testCases[j][0][1], 0, new HashMap<Tuple, Tuple>(testCases[j][0][1]*2));
             duration   = System.nanoTime() - start;
 
             System.out.format("Run %2d of testCase %2d with rfill produced value of %6d (expected %6d) in %6dµs%n",
@@ -87,22 +89,59 @@ public class Knapsack {
     }
   }
 
-  static int rfill ( int[][] input, int capacty, int item, int d ){
+  private static class Tuple{
+    final int _1;
+    final int _2;
+    int _value;
+
+    public Tuple( int one, int two) {
+      _1 = one;
+      _2 = two;
+    }
+
+    @Override
+    public boolean equals( Object other ){
+      if ( other instanceof Tuple ) {
+        Tuple ot = ( Tuple ) other;
+        return ot._1 == _1 && ot._2 == _2;
+      }
+      return false;
+    }
+    @Override
+    public int hashCode() {
+      int hashCode = 7 ; 
+      hashCode *= 31; hashCode+=_1;
+      hashCode *= 31; hashCode+=_2;
+      return hashCode;
+    }
+
+  }
+
+  static int rfill ( int[][] input, int capacty, int item, int d, Map<Tuple, Tuple> previousSolutions ){
     if ( capacty == 0 ) return 0;
     if ( item    == 0 ) return 0;
 
-    int pb = rfill( input, capacty, item - 1, d + 1);
+    Tuple solution = new Tuple(capacty, item);
+    Tuple ps = previousSolutions.get(solution);
+    if ( ps != null ) return ps._value;
+
+    int pb = rfill( input, capacty, item - 1, d + 1, previousSolutions);
+
 
     if ( capacty < input[item][1] ) {
       return pb;
     }
 
-    int ns = rfill( input, capacty - input[item][1], item - 1, d + 1) + input[item][0];
+    int ns = rfill( input, capacty - input[item][1], item - 1, d + 1, previousSolutions) + input[item][0];
 
     if (_loud ) System.out.format("rfill: d=%d, i=%d, c=%d, pb=%d, ns=%d%n",
       d, item, capacty, pb, ns);
 
-    return Math.max(pb, ns);
+    int value = Math.max(pb, ns);
+    solution._value = value;
+    previousSolutions.put(solution, solution);
+
+    return value;
   }
 
   static int[][] fill( int[][] input ){
