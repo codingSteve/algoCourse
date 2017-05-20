@@ -45,7 +45,20 @@ public class Knapsack {
           long duration    = System.nanoTime() - start;
           int totalValue   = solution[input[0][1]][input[0][0]];
 
-          System.out.format("Run %2d of file %s produced value %d in %6dµs%n",
+          System.out.format("Run %2d of file with  fill %s produced value %d in %6dµs%n",
+            j, args[i], totalValue, duration /1000);
+          
+        }
+
+      }
+      else if ( "--rfile".equals(args[i])) {
+        int[][] input = Utils.fileToRaggedArrayOfInts( args[++i], " ");
+        for (int j = times ; --j>=0 ; ) {
+          long start     = System.nanoTime();
+          int totalValue = rfill( input, input[0][0] , input[0][1], 0, new HashMap<Tuple, Tuple>(input[0][1]*2));
+          long duration  = System.nanoTime() - start;
+
+          System.out.format("Run %2d of file with rfill %s produced value %d in %6dµs%n",
             j, args[i], totalValue, duration /1000);
           
         }
@@ -123,7 +136,11 @@ public class Knapsack {
 
     Tuple solution = new Tuple(capacty, item);
     Tuple ps = previousSolutions.get(solution);
-    if ( ps != null ) return ps._value;
+    if ( ps != null ) {
+      if (_loud) System.out.format("rfill: d=%d, i=%d, c=%d, pb=%d, cache hit%n",
+      d, item, capacty, ps._value);
+      return ps._value;
+    }
 
     int pb = rfill( input, capacty, item - 1, d + 1, previousSolutions);
 
