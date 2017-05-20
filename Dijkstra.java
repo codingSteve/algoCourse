@@ -141,10 +141,14 @@ public class Dijkstra {
 
   public static int[] dijkstra( Node[] graph ) { 
     Node s = graph[0];
+    return dijkstra( graph, s);
+  }
+
+  public static int[] dijkstra( Node[] graph, Node s ) { 
 
     s._explored = true;
 
-    OrderedList<Edge> crossingEdges = new AscendingList<Edge>();
+    PriorityQueue<Edge> crossingEdges = new PriorityQueue<Edge>();
     crossingEdges.addAll( s._edges );
 
     while ( ! crossingEdges.isEmpty() ) { // there are unexplored nodes
@@ -216,7 +220,8 @@ public class Dijkstra {
     boolean _explored     = false;
     int     _shortestPath = 0;
 
-    AscendingList<Edge> _edges = new AscendingList<>();
+    PriorityQueue<Edge> _edges    = new PriorityQueue<>();
+    Collection<Edge>    _incoming = new ArrayList<>();
 
     Node( int nodeID ) { 
       _nodeID = nodeID;
