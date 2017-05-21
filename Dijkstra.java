@@ -25,14 +25,15 @@ import java.util.*;
 * positions in the heap.
 */
 public class Dijkstra {
-  private static final int MAX_PATH = 1000000;
-  private static final int[] DESTINATION_NODES = new int[]{7,37,59,82,99,115,133,165,188,197};
+  public static final int MAX_PATH = 1000000;
+  public static final int UNSET    = Integer.MAX_VALUE;
+  public static final int[] DESTINATION_NODES = new int[]{7,37,59,82,99,115,133,165,188,197};
   
   private static String[] testCase0 = new String[] { 
     "1 2,1", "2 3,1", "3 4,1", "4 5,1", "5 4,1"
   };
 
-  private static int[] expectation0 = new int[]{0,1,2,3,4};
+  private static int[] expectation0 = new int[]{UNSET,1,2,3,4};
 
   private static String[] testCase1 = new String[]{ 
    "1 2,1 8,2",
@@ -42,18 +43,19 @@ public class Dijkstra {
    "5 4,1 6,1",
    "6 5,1 7,1",
    "7 6,1 8,1",
-   "8 1,2 7,1"
+   "8 1,2 7,1 9,1",
+   "9 "
   };
 
-  private static int[] expectation1 = new int[]{0,1,2,3,4,4,3,2};
+  private static int[] expectation1 = new int[]{UNSET,1,2,3,4,4,3,2,3};
 
 
   private static String[][] testCases = new String[][]{ testCase0,    testCase1    };
   private static int[][]    expectations = new int[][]{ expectation0, expectation1 };
 
 
-  private static boolean _quiet = true;
-  private static boolean _loud  = false;
+  static boolean _quiet = true;
+  static boolean _loud  = false;
 
   private static Map<Integer, Node> nodes = new HashMap<>();
 
@@ -151,7 +153,10 @@ public class Dijkstra {
     PriorityQueue<Edge> crossingEdges = new PriorityQueue<Edge>();
     crossingEdges.addAll( s._edges );
 
+    if ( _loud ) System.out.format("About to find shortest paths for %s%n", s);
+
     while ( ! crossingEdges.isEmpty() ) { // there are unexplored nodes
+      if ( _loud ) System.out.format("Crossing edges == %s%n", crossingEdges);
       Edge shortest = crossingEdges.remove();
 
 
@@ -160,7 +165,9 @@ public class Dijkstra {
 
       Node tail = shortest._tail;
       Node head = shortest._head;
-      head._shortestPath = tail._shortestPath + shortest._length;
+      int newPath = ((tail._shortestPath == UNSET) ? 0 : tail._shortestPath) + shortest._length;
+ 
+      head._shortestPath = newPath;
 
       head._explored = true;
 
@@ -218,10 +225,10 @@ public class Dijkstra {
     final int _nodeID;
 
     boolean _explored     = false;
-    int     _shortestPath = 0;
+    int     _shortestPath = UNSET;
 
-    PriorityQueue<Edge> _edges    = new PriorityQueue<>();
-    Collection<Edge>    _incoming = new ArrayList<>();
+    Collection<Edge> _edges    = new ArrayList<>();
+    Collection<Edge> _incoming = new ArrayList<>();
 
     Node( int nodeID ) { 
       _nodeID = nodeID;
@@ -236,14 +243,14 @@ public class Dijkstra {
   public static class Edge implements Comparable<Edge> { 
     final Node _tail;
     final Node _head;
-    final int _length;
+    int _length;
 
     Edge ( Node tail, Node head, int length ) { 
       _tail = tail; _head = head; _length = length;
     }
 
     public int score(){
-      return _length + _tail._shortestPath;
+      return _length + ((_tail._shortestPath ==UNSET) ? 0 : _tail._shortestPath);
     }
 
     public String toString() { 

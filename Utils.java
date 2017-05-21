@@ -49,6 +49,17 @@ public class Utils {
   }
 
 
+  public static void logRaggedDoubles( double[]... twoDimensionalArray ) {
+    int i = 0;
+
+    System.out.println('[');
+    for ( ; i < twoDimensionalArray.length && i < _loopMax ; i++ ) {
+      logDoubles(twoDimensionalArray[i]);
+    }
+    if ( i == _loopMax ) System.out.print( "... ");
+    System.out.println(']');
+  }
+
   public static void logRaggedInts( int[]... twoDimensionalArray ) {
     int i = 0;
 
@@ -60,10 +71,20 @@ public class Utils {
     System.out.println(']');
   }
 	public static void logInts(int... ints){
+    System.out.print('[');
+    int i  =0 ;
+    for ( ; i < ints.length && i < _loopMax ; i++ ) {
+      System.out.print(ints[i]);
+      System.out.print(',');
+    }
+    if ( i == _loopMax ) System.out.print( "... ");
+    System.out.println(']');
+  }
+public static void logDoubles(double... doubles){
 		System.out.print('[');
     int i  =0 ;
-		for ( ; i < ints.length && i < _loopMax ; i++ ) {
-			System.out.print(ints[i]);
+		for ( ; i < doubles.length && i < _loopMax ; i++ ) {
+			System.out.print(doubles[i]);
 			System.out.print(',');
 		}
     if ( i == _loopMax ) System.out.print( "... ");
