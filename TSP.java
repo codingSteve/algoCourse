@@ -3,11 +3,14 @@ import java.util.Arrays;
 public class TSP {
 
     private static boolean _loud = false;
-    private static double[][] testCase0 = new double[][]{{4.00d}, {1.00d, 1.00d}, {2.00d, 1.00d}, {2.00d, 2.00d}, {1.00d, 2.00d}};
-    private static double expectation0  = 4.00d;
+    private static double[][] testCase0 = new double[][]{{2.00d}, {1.00d, 1.00d}, {2.00d, 1.00d}, };
+    private static double expectation0  = 2.00d;
 
-    private static double[][][] testCases = new double[][][]{testCase0,};
-    private static double[] expectations = new double[]{expectation0,};
+    private static double[][] testCase1 = new double[][]{{4.00d}, {1.00d, 1.00d}, {2.00d, 1.00d}, {2.00d, 2.00d}, {1.00d, 2.00d}};
+    private static double expectation1  = 4.00d;
+
+    private static double[][][] testCases    = new double[][][]{testCase0,   testCase1,    };
+    private static double[]     expectations = new double[]{    expectation0,expectation1, };
 
     public static void main(String[] ARGV) throws Exception {
         int times = 1;
@@ -26,7 +29,7 @@ public class TSP {
                         double actual = tsp(rawInput);
                         long duration = System.nanoTime() - start;
 
-                        System.out.format("Run %3d of testcase %d produced tour length %6.6f (expected %6.6f) in %6dμs",
+                        System.out.format("Run %3d of testcase %d produced tour length %6.6f (expected %6.6f) in %6dμs%n",
                                 k, j, actual, expected, (duration / 1000));
                         if (expected != actual) break TESTS;
 
@@ -41,15 +44,14 @@ public class TSP {
 
         final double cities = rawInput[0][0];
         final int arrayLength = (int) Math.pow(2.00d, cities);
-        double[][] A = new double[arrayLength][arrayLength];
+        double[][] A = new double[arrayLength][(int) cities+1];
 
-        for ( int s = arrayLength ; --s>=0 ; ) A[s][1] = Double.POSITIVE_INFINITY;
+        for ( int s = arrayLength ; --s>=0 ; ) Arrays.fill( A[s], Double.POSITIVE_INFINITY); //A[s][1] = Double.POSITIVE_INFINITY;
         A[1][1] = 0;
 
-
         double[][] C = new double[(int)cities+1][(int)cities+1];
-        for (int i = (int) cities; --i >=1 ; ) {
-            for ( int j = (int) cities ; --j>=1 ;){
+        for (int i = (int) cities+1; --i >=1 ; ) {
+            for ( int j = (int) cities+1 ; --j>=1 ;){
                 final double[] cityI = rawInput[i];
                 final double[] cityJ = rawInput[j];
                 C[i][j]= Math.pow(  Math.pow(cityI[0] - cityJ[0], 2) +
@@ -60,25 +62,31 @@ public class TSP {
 
         if ( _loud ) Utils.logRaggedDoubles( C );
 
-        for (double m = 2; m <= cities; m++) {
+        for (double m = 2; m <= cities; m++) { // increase the budget of used cities until we use them all
             int[] includedCities = sets((int)m-1, (int) cities-1, 0);
-            if ( _loud ) {
-                System.out.format("m=%d, c=%d: ", (int) m, (int)cities);
-                Utils.logInts(includedCities);
-                Utils.logRaggedInts(Utils.intsToBits( includedCities));
-            }
+
+//            if ( _loud ) {
+//                System.out.format("m=%d, c=%d: ", (int) m, (int)cities);
+//                Utils.logInts(includedCities);
+//                Utils.logRaggedInts(Utils.intsToBits( includedCities));
+//            }
+
             for (int s : includedCities) {
-                int sp = (s<<1)+1; // left shift and include city one
+                int sp = (s<<1)+1; // left shift and include city one always
 
                 if ( _loud ) {
                     System.out.print("Working with cities: ");
                     Utils.logInts( Utils.intToBits(sp) );
                 }
 
+                /*
+                The intention here is to find whether a particular city is in scope
+                this iteration
+                 */
                 CHCKING_DESTINATIONS:
-                for (int j = 2; j < m; j++) {
+                for (int j = 2; j <= m; j++) {
 
-                    int jMask = 1 << (j);
+                    int jMask = 1 << (j-1);
                     final int destinationIncluded = jMask & sp;
                     if ( _loud ) {
                         System.out.print("Check  j ") ; Utils.logInts(Utils.intToBits(jMask));
@@ -91,28 +99,33 @@ public class TSP {
 
                     double minCost = Double.POSITIVE_INFINITY;
 
+
                     CHEAPEST_ROUTE_SEARCH:
-                    for (int k = 2; k < m; k++) {
-                        if (_loud) System.out.format("m=%d, s=%d, j=%d, k=%d%n", (int) m, (int) s, (int) j, (int) k);
+                    for (int k = 1; k <= m; k++) {
+                        if (_loud) System.out.format("m=%d, sp=%d, j=%d, k=%d%n", (int) m, (int) sp, (int) j, (int) k);
                         if ( j == k ) continue CHEAPEST_ROUTE_SEARCH;
 
 
                         int kMask = 1<<(k);
-                        int subproblem = sp - destinationIncluded;
-
-                        final double previousBest = A[subproblem][k];
+                        int subproblem = sp & ~( jMask );
                         if ( _loud ) {
-                            System.out.format("Previos best %6.3f for Subproblem with cities: ", previousBest);
-                            Utils.logInts(Utils.intToBits(subproblem));
+                            System.out.format("sp         : %4d : ",sp         ); Utils.logInts(Utils.intToBits(sp));
+                            System.out.format("jMask      : %4d : ",jMask      ); Utils.logInts(Utils.intToBits(jMask));
+                            System.out.format("subproblem : %4d : ",subproblem ); Utils.logInts(Utils.intToBits(subproblem));
                         }
 
+                        final double stubToK = A[subproblem][k]; // cost of hiting cities in `subproblem`end  at k
+                        double newSolution =  (stubToK + C[k][j]); // plus the cost of going from k to j
 
-                        double basdName =  (previousBest + C[k][j]);
-                        if ( basdName < minCost ) {
-                            minCost = basdName;
-                            A[jMask][j] = basdName;
+                        if ( _loud ) {
+                            System.out.format("Previous best for stub %6.3f, new option %6.3f for Subproblem with cities: ", stubToK, newSolution);
+                            Utils.logInts(Utils.intToBits(sp));
                         }
 
+                        if ( newSolution < minCost ) {
+                            minCost = newSolution;
+                            A[sp][j] = newSolution; // starting at 1 hitting all the cities in`sp` and end at j
+                        }
                     }
                 }
             }
@@ -120,8 +133,20 @@ public class TSP {
 
         if ( _loud ) Utils.logRaggedDoubles(A);
 
+        double minTour  = Double.POSITIVE_INFINITY;
+        int    bestDest = -1;
 
-        return -1.00d;
+        final double[] lastProblem = A[A.length - 1];
+        for (int i = (int) cities+1; --i >= 1 ; )  {
+            double returnCost = C[i][1];
+            final double totalTour = lastProblem[i];
+            if (minTour > totalTour) {
+                bestDest = i;
+                minTour = totalTour;
+            }
+        }
+
+        return minTour + C[bestDest][1] ;
     }
 
 
