@@ -18,6 +18,19 @@ public class TSP {
             if ("--loud".equals(ARGV[i])) _loud = true;
             else if ("--quiet".equals(ARGV[i])) _loud = false;
             else if ("--times".equals(ARGV[i])) times = Integer.valueOf(ARGV[++i]);
+            else if ("--file".equals(ARGV[i])) {
+                for ( int j = times; --j >=0 ; ) {
+
+                    String fileName = ARGV[++i];
+                    double[][] rawInput = Utils.fileToRaggedArrayOfDoubles(fileName, " ");
+                    long start = System.nanoTime();
+                    double actual = tsp(rawInput);
+                    long duration = System.nanoTime() - start;
+
+                    System.out.format("Run %3d of file %s produced tour length %6.6f in %6dμs%n",
+                             j, fileName, actual, (duration / 1000));
+                }
+            }
             else if ("--test".equals(ARGV[i])) {
                 TESTS:
                 for (int j = testCases.length; --j >= 0; ) {
