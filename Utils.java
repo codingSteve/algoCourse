@@ -160,6 +160,16 @@ public static void logDoubles(double... doubles){
         for ( int i = records.length; --i >= 0 ; ) { rows[i] = stringsToInts( records[i].split(delimiter) ); }
         return rows;
   }
+  public static double[][] fileToRaggedArrayOfDoubles ( final String fileName ) throws Exception { return fileToRaggedArrayOfDoubles(fileName, "\t"); }
+
+  public static double[][] fileToRaggedArrayOfDoubles( final String fileName, final String delimiter ) throws Exception {
+        final Path p = FileSystems.getDefault().getPath(fileName);
+        final String[] records = fileToStringArray( fileName );
+
+        double[][] rows = new double[records.length][];
+        for ( int i = records.length; --i >= 0 ; ) { rows[i] = stringsToDoubles( records[i].split(delimiter) ); }
+        return rows;
+  }
 
 
 
@@ -197,6 +207,18 @@ public static void logDoubles(double... doubles){
 		int[] ints = new int[strings.size()];
 		for( int i = strings.size(); --i >=0;) ints[i] = Integer.valueOf(strings.get(i)).intValue();
 		return ints;
+	}
+
+	public static double[] stringsToDoubles( final String[] strings ){
+        double[] doubles = new double[strings.length];
+		for( int i = strings.length; --i >=0;) doubles[i] = Double.valueOf(strings[i]).intValue();
+		return doubles;
+	}
+
+	public static double[] stringsToDoubles( final List<String> strings ){
+        double[] doubles = new double[strings.size()];
+		for( int i = strings.size(); --i >=0;) doubles[i] = Double.valueOf(strings.get(i)).intValue();
+		return doubles;
 	}
 
 	public static Integer[] stringsToIntegers( final String[] strings ){
