@@ -38,8 +38,29 @@ public class TSP {
 
     public static double tsp(double[][] rawInput) {
 
+
         final double cities = rawInput[0][0];
-        for (double m = 2; m < cities; m++) {
+        final int arrayLength = (int) Math.pow(2.00d, cities);
+        double[][] A = new double[arrayLength][arrayLength];
+
+        for ( int s = arrayLength ; --s>=0 ; ) A[s][1] = Double.POSITIVE_INFINITY;
+        A[1][1] = 0;
+
+
+        double[][] C = new double[(int)cities+1][(int)cities+1];
+        for (int i = (int) cities; --i >=1 ; ) {
+            for ( int j = (int) cities ; --j>=1 ;){
+                final double[] cityI = rawInput[i];
+                final double[] cityJ = rawInput[j];
+                C[i][j]= Math.pow(  Math.pow(cityI[0] - cityJ[0], 2) +
+                                    Math.pow(cityI[1] - cityJ[1], 2)
+                                    , 0.5D);
+            }
+        }
+
+        if ( _loud ) Utils.logRaggedDoubles( C );
+
+        for (double m = 2; m <= cities; m++) {
             int[] includedCities = sets((int)m-1, (int) cities-1, 0);
             if ( _loud ) {
                 System.out.format("m=%d, c=%d: ", (int) m, (int)cities);
@@ -47,19 +68,57 @@ public class TSP {
                 Utils.logRaggedInts(Utils.intsToBits( includedCities));
             }
             for (int s : includedCities) {
-                int sp = (s<<1)+1;
+                int sp = (s<<1)+1; // left shift and include city one
 
+                if ( _loud ) {
+                    System.out.print("Working with cities: ");
+                    Utils.logInts( Utils.intToBits(sp) );
+                }
+
+                CHCKING_DESTINATIONS:
                 for (int j = 2; j < m; j++) {
-                    int jMask = 1 << j;
-                    for (int k = 2; k < m; k++) {
-                        if ( j == k ) continue;
 
-                        int kMask = 1<<k;
+                    int jMask = 1 << (j);
+                    final int destinationIncluded = jMask & sp;
+                    if ( _loud ) {
+                        System.out.print("Check  j ") ; Utils.logInts(Utils.intToBits(jMask));
+                        System.out.print("Check sp ") ; Utils.logInts(Utils.intToBits(sp));
+                        System.out.println("destinationIncluded == " + destinationIncluded);
+                    }
+
+
+                    if ( destinationIncluded == 0) continue CHCKING_DESTINATIONS; // this destination city is not included so skip
+
+                    double minCost = Double.POSITIVE_INFINITY;
+
+                    CHEAPEST_ROUTE_SEARCH:
+                    for (int k = 2; k < m; k++) {
+                        if (_loud) System.out.format("m=%d, s=%d, j=%d, k=%d%n", (int) m, (int) s, (int) j, (int) k);
+                        if ( j == k ) continue CHEAPEST_ROUTE_SEARCH;
+
+
+                        int kMask = 1<<(k);
+                        int subproblem = sp - destinationIncluded;
+
+                        final double previousBest = A[subproblem][k];
+                        if ( _loud ) {
+                            System.out.format("Previos best %6.3f for Subproblem with cities: ", previousBest);
+                            Utils.logInts(Utils.intToBits(subproblem));
+                        }
+
+
+                        double basdName =  (previousBest + C[k][j]);
+                        if ( basdName < minCost ) {
+                            minCost = basdName;
+                            A[jMask][j] = basdName;
+                        }
 
                     }
                 }
             }
         }
+
+        if ( _loud ) Utils.logRaggedDoubles(A);
 
 
         return -1.00d;
