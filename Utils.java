@@ -9,7 +9,7 @@ public class Utils {
     * This is taken from Wikipedia, it's shorter and will execute the loop
     * fewer times.
     * 
-    * Hamming distance: {@link https://en.wikipedia.org/wiki/Hamming_distance}
+    * Hamming distance:  https://en.wikipedia.org/wiki/Hamming_distance
     */
   public static int hamDistance( final int x, final int y ) {
       int z = (x ^ y);
@@ -26,7 +26,7 @@ public class Utils {
   * This is a naive implementation which is longer and will execute the main 
   * loop more times than the version above. 
   * 
-  * Hamming distance: {@link https://en.wikipedia.org/wiki/Hamming_distance}
+  * Hamming distance: https://en.wikipedia.org/wiki/Hamming_distance
   */
   @Deprecated
   private static int hamDistanceS( final int x, final int y ) {
@@ -46,6 +46,18 @@ public class Utils {
   		result += bits[i];
   	}
   	return result;
+  }
+
+  public static int[] intToBits( int n ) {
+      int[] r = new int[8];
+      for ( int i = 8 ; --i>= 0 ; ) r[i] = (((1<<i)  & n ) != 0 ) ? 1 : 0;
+      return r;
+  }
+
+  public static int[][] intsToBits( int[] ns) {
+      int[][] r = new int[ns.length][8];
+      for ( int i = ns.length; --i>=0 ; ) r[i] = intToBits(ns[i]);
+      return r;
   }
 
 
