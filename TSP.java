@@ -89,6 +89,12 @@ public class TSP {
         if ( _loud ) Utils.logRaggedDoubles( C );
 
         for (double m = 2; m <= cities; m++) { // increase the budget of used cities until we use them all
+            if ( m >= 4 ) {
+                for ( int s : sets((int) m-3, (int) cities  -1, 0)){
+                    A.remove(  1+ (s<<1)  );
+                }
+                System.gc();
+            }
             int[] includedCities = sets((int)m-1, (int) cities-1, 0);
 
 //            if ( _loud ) {
@@ -160,7 +166,6 @@ public class TSP {
             }
         }
 
-//        if ( _loud ) Utils.logRaggedDoubles(A);
 
         double minTour  = Double.POSITIVE_INFINITY;
         int    bestDest = -1;
