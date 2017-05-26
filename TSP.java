@@ -1,4 +1,6 @@
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TSP {
 
@@ -57,10 +59,21 @@ public class TSP {
 
         final double cities = rawInput[0][0];
         final int arrayLength = (int) Math.pow(2.00d, cities);
-        double[][] A = new double[arrayLength][(int) cities+1];
+//        double[][] A = new double[arrayLength][(int) cities+1];
+//
+//        for ( int s = arrayLength ; --s>=0 ; ) Arrays.fill( A[s], Double.POSITIVE_INFINITY); //A[s][1] = Double.POSITIVE_INFINITY;
+//        A[1][1] = 0;
 
-        for ( int s = arrayLength ; --s>=0 ; ) Arrays.fill( A[s], Double.POSITIVE_INFINITY); //A[s][1] = Double.POSITIVE_INFINITY;
-        A[1][1] = 0;
+        Map<Integer, double[]> A = new HashMap<>();
+
+        double[] template = new double[(int) cities +1 ];
+        Arrays.fill( template, Double.POSITIVE_INFINITY );
+
+        double[] homeRow = new double[(int) cities +1 ];
+        Arrays.fill( homeRow, Double.POSITIVE_INFINITY);
+        homeRow[1]=0;
+
+        A.put( 1, homeRow );
 
         double[][] C = new double[(int)cities+1][(int)cities+1];
         for (int i = (int) cities+1; --i >=1 ; ) {
@@ -86,6 +99,9 @@ public class TSP {
 
             for (int s : includedCities) {
                 int sp = (s<<1)+1; // left shift and include city one always
+                double[] currentRecord = new double[(int) cities + 1 ];
+                Arrays.fill( currentRecord, Double.POSITIVE_INFINITY);
+                A.put( sp, currentRecord );
 
                 if ( _loud ) {
                     System.out.print("Working with cities: ");
@@ -127,7 +143,7 @@ public class TSP {
                             System.out.format("subproblem : %4d : ",subproblem ); Utils.logInts(Utils.intToBits(subproblem));
                         }
 
-                        final double stubToK = A[subproblem][k]; // cost of hiting cities in `subproblem`end  at k
+                        final double stubToK = A.get(subproblem)[k]; // cost of hiting cities in `subproblem`end  at k
                         double newSolution =  (stubToK + C[k][j]); // plus the cost of going from k to j
 
                         if ( _loud ) {
@@ -137,19 +153,20 @@ public class TSP {
 
                         if ( newSolution < minCost ) {
                             minCost = newSolution;
-                            A[sp][j] = newSolution; // starting at 1 hitting all the cities in`sp` and end at j
+                            currentRecord[j] = newSolution; // starting at 1 hitting all the cities in`sp` and end at j
                         }
                     }
                 }
             }
         }
 
-        if ( _loud ) Utils.logRaggedDoubles(A);
+//        if ( _loud ) Utils.logRaggedDoubles(A);
 
         double minTour  = Double.POSITIVE_INFINITY;
         int    bestDest = -1;
 
-        final double[] lastProblem = A[A.length - 1];
+        int[] finalProblems = sets((int)cities, (int) cities, 0);
+        final double[] lastProblem = A.get(finalProblems[0]);
         for (int i = (int) cities+1; --i >= 1 ; )  {
             double returnCost = C[i][1];
             final double totalTour = lastProblem[i];
