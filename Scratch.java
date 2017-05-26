@@ -2,7 +2,7 @@ public class Scratch {
 
     public static void main( String[] ARGV){
         Utils.logStrings( ARGV );
-        Utils.logInts( Utils.bitsToInt( ARGV ));
+//        Utils.logInts( Utils.bitsToInt( ARGV ));
     }
 	/** Routine to count the different bits between two integers.
 	*
