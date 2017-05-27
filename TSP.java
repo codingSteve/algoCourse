@@ -123,7 +123,7 @@ public class TSP {
                 this iteration
                  */
                 CHCKING_DESTINATIONS: // todo problem here in the j loop
-                for ( int j = (int) m+1; --j>=2; ){
+                for ( int j = (int) cities+2; --j>=2; ){
 
                     int jMask = 1 << (j-1);
                     final int destinationIncluded = jMask & sp;
