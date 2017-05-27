@@ -66,9 +66,6 @@ public class TSP {
 
         Map<Integer, double[]> A = new HashMap<>();
 
-        double[] template = new double[(int) cities +1 ];
-        Arrays.fill( template, Double.POSITIVE_INFINITY );
-
         double[] homeRow = new double[(int) cities +1 ];
         Arrays.fill( homeRow, Double.POSITIVE_INFINITY);
         homeRow[1]=0;
@@ -97,6 +94,10 @@ public class TSP {
 //                Utils.logRaggedInts(Utils.intsToBits( includedCities));
 //            }
 
+						if ( m >= 4 ) { 
+						  for ( int s : sets( (int) m-3, (int) cities-1, 0)) A.remove( 1 + (s<<1));
+						}
+
             for (int s : includedCities) {
                 int sp = (s<<1)+1; // left shift and include city one always
                 double[] currentRecord = new double[(int) cities + 1 ];
@@ -117,11 +118,11 @@ public class TSP {
 
                     int jMask = 1 << (j-1);
                     final int destinationIncluded = jMask & sp;
-                    if ( _loud ) {
-                        System.out.print("Check  j ") ; Utils.logInts(Utils.intToBits(jMask));
-                        System.out.print("Check sp ") ; Utils.logInts(Utils.intToBits(sp));
-                        System.out.println("destinationIncluded == " + destinationIncluded);
-                    }
+                    //if ( _loud ) {
+                    //    System.out.print("Check  j ") ; Utils.logInts(Utils.intToBits(jMask));
+                    //    System.out.print("Check sp ") ; Utils.logInts(Utils.intToBits(sp));
+                    //    System.out.println("destinationIncluded == " + destinationIncluded);
+                    //}
 
 
                     if ( destinationIncluded == 0) continue CHCKING_DESTINATIONS; // this destination city is not included so skip
@@ -137,19 +138,19 @@ public class TSP {
 
                         int kMask = 1<<(k);
                         int subproblem = sp & ~( jMask );
-                        if ( _loud ) {
-                            System.out.format("sp         : %4d : ",sp         ); Utils.logInts(Utils.intToBits(sp));
-                            System.out.format("jMask      : %4d : ",jMask      ); Utils.logInts(Utils.intToBits(jMask));
-                            System.out.format("subproblem : %4d : ",subproblem ); Utils.logInts(Utils.intToBits(subproblem));
-                        }
+                        //if ( _loud ) {
+                        //    System.out.format("sp         : %4d : ",sp         ); Utils.logInts(Utils.intToBits(sp));
+                        //    System.out.format("jMask      : %4d : ",jMask      ); Utils.logInts(Utils.intToBits(jMask));
+                        //    System.out.format("subproblem : %4d : ",subproblem ); Utils.logInts(Utils.intToBits(subproblem));
+                        //}
 
                         final double stubToK = A.get(subproblem)[k]; // cost of hiting cities in `subproblem`end  at k
                         double newSolution =  (stubToK + C[k][j]); // plus the cost of going from k to j
 
-                        if ( _loud ) {
-                            System.out.format("Previous best for stub %6.3f, new option %6.3f for Subproblem with cities: ", stubToK, newSolution);
-                            Utils.logInts(Utils.intToBits(sp));
-                        }
+                        //if ( _loud ) {
+                        //    System.out.format("Previous best for stub %6.3f, new option %6.3f for Subproblem with cities: ", stubToK, newSolution);
+                        //    Utils.logInts(Utils.intToBits(sp));
+                        //}
 
                         if ( newSolution < minCost ) {
                             minCost = newSolution;
@@ -203,9 +204,4 @@ public class TSP {
         System.arraycopy(unusedM, 0, result, usedM.length, unusedM.length);
         return result;
     }
-
-
-
-
-
 }
