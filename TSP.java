@@ -134,16 +134,17 @@ public class TSP {
                     if ( destinationIncluded == 0) continue CHCKING_DESTINATIONS; // this destination city is not included so skip
 
                     double minCost = Double.POSITIVE_INFINITY;
+                    int subproblem = sp & ~( jMask );
 
 
                     CHEAPEST_ROUTE_SEARCH:
                     for (int k = 1; k <= m; k++) {
-                        if (_loud) System.out.format("m=%d, sp=%d, j=%d, k=%d%n", (int) m, (int) sp, (int) j, (int) k);
+                        //if (_loud) System.out.format("m=%d, sp=%d, j=%d, k=%d%n", (int) m, (int) sp, (int) j, (int) k);
                         if ( j == k ) continue CHEAPEST_ROUTE_SEARCH;
 
 
-                        int kMask = 1<<(k);
-                        int subproblem = sp & ~( jMask );
+                        //int kMask = 1<<(k);
+                        
                         //if ( _loud ) {
                         //    System.out.format("sp         : %4d : ",sp         ); Utils.logInts(Utils.intToBits(sp));
                         //    System.out.format("jMask      : %4d : ",jMask      ); Utils.logInts(Utils.intToBits(jMask));
@@ -160,9 +161,9 @@ public class TSP {
 
                         if ( newSolution < minCost ) {
                             minCost = newSolution;
-                            currentRecord[j] = newSolution; // starting at 1 hitting all the cities in`sp` and end at j
                         }
                     }
+                    currentRecord[j] = newSolution; // starting at 1 hitting all the cities in`sp` and end at j
                 }
             }
         }
@@ -173,6 +174,8 @@ public class TSP {
 
         int[] finalProblems = sets((int)cities, (int) cities, 0);
         final double[] lastProblem = A.get(finalProblems[0]);
+        Utils.logInts( Utils.intsToBits( lastProblem )); 
+        
         for (int i = (int) cities+1; --i >= 1 ; )  {
             double returnCost = C[i][1];
             final double totalTour = lastProblem[i];
