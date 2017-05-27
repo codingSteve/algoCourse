@@ -55,7 +55,7 @@ public class TSP {
 
                         System.out.format("Run %3d of testcase %d produced tour length %6.6f (expected %6.6f) in %6dμs%n",
                                 k, j, actual, expected, (duration / 1000));
-                        if (expected != actual) break TESTS;
+                        //if (expected != actual) break TESTS;
 
                     }
                 }
@@ -83,8 +83,8 @@ public class TSP {
 
         double[][] C = new double[(int)cities+1][(int)cities+1];
         for (int i = (int) cities+1; --i >=1 ; ) {
+            final double[] cityI = rawInput[i];
             for ( int j = (int) cities+1 ; --j>=1 ;){
-                final double[] cityI = rawInput[i];
                 final double[] cityJ = rawInput[j];
                 C[i][j]= Math.pow(  Math.pow(cityI[0] - cityJ[0], 2) +
                                     Math.pow(cityI[1] - cityJ[1], 2)
@@ -95,7 +95,7 @@ public class TSP {
         if ( _loud ) Utils.logRaggedDoubles( C );
 
         for (double m = 2; m <= cities; m++) { // increase the budget of used cities until we use them all
-            if ( m >= 4 && 1==2) { // we can start cleaning up after ourselves
+            if ( m >= 4 && !_loud ) { // we can start cleaning up after ourselves
                 for ( int s : sets((int) m-3, (int) cities  -1, 0)) A.remove( 1+ (s<<1) ); 
             }
 
@@ -140,7 +140,7 @@ public class TSP {
                     int subproblem = sp & ~( jMask );
 
                     CHEAPEST_ROUTE_SEARCH:
-                    for (int k =  (int) m+1; --k >=1 ; )  {
+                    for (int k =  (int) cities+1; --k >=1 ; )  {
                         if (_loud) System.out.format("m=%d, sp=%d, j=%d, k=%d%n", (int) m, (int) sp, (int) j, (int) k);
                         if ( j == k ) continue CHEAPEST_ROUTE_SEARCH;
 
