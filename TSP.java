@@ -122,7 +122,7 @@ public class TSP {
                 The intention here is to find whether a particular city is in scope
                 this iteration
                  */
-                CHCKING_DESTINATIONS:
+                CHCKING_DESTINATIONS: // todo problem here in the j loop
                 for ( int j = (int) m+1; --j>=2; ){
 
                     int jMask = 1 << (j-1);
