@@ -96,7 +96,8 @@ public static void logDoubles(double... doubles){
 		System.out.print('[');
     int i  =0 ;
 		for ( ; i < doubles.length && i < _loopMax ; i++ ) {
-			System.out.format("%6.3f,",doubles[i]);
+			System.out.print(doubles[i]);
+      System.out.print(',');
 		}
     if ( i == _loopMax ) System.out.print( "... ");
 		System.out.println(']');
