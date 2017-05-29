@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.util.*;
 import java.nio.file.*;
 
@@ -61,7 +62,19 @@ public class Utils {
   }
 
 
-  public static void logRaggedDoubles( double[]... twoDimensionalArray ) {
+    public static void logRaggedBigDecimals( BigDecimal[]... twoDimensionalArray ) {
+        int i = 0;
+
+        System.out.println('[');
+        for ( ; i < twoDimensionalArray.length && i < _loopMax ; i++ ) {
+            logBigDecimals(twoDimensionalArray[i]);
+        }
+        if ( i == _loopMax ) System.out.print( "... ");
+        System.out.println(']');
+    }
+
+
+    public static void logRaggedDoubles( double[]... twoDimensionalArray ) {
     int i = 0;
 
     System.out.println('[');
@@ -92,18 +105,30 @@ public class Utils {
     if ( i == _loopMax ) System.out.print( "... ");
     System.out.println(']');
   }
-public static void logDoubles(double... doubles){
-		System.out.print('[');
-    int i  =0 ;
-		for ( ; i < doubles.length && i < _loopMax ; i++ ) {
-			System.out.print(doubles[i]);
-      System.out.print(',');
-		}
-    if ( i == _loopMax ) System.out.print( "... ");
-		System.out.println(']');
-	}
 
-	public static void logObjects( Collection c ) { 
+    public static void logDoubles(double... doubles){
+        System.out.print('[');
+        int i  =0 ;
+        for ( ; i < doubles.length && i < _loopMax ; i++ ) {
+            System.out.print(doubles[i]);
+            System.out.print(',');
+        }
+        if ( i == _loopMax ) System.out.print( "... ");
+        System.out.println(']');
+    }
+
+    public static void logBigDecimals(BigDecimal... doubles){
+        System.out.print('[');
+        int i  =0 ;
+        for ( ; i < doubles.length && i < _loopMax ; i++ ) {
+            System.out.print(doubles[i]);
+            System.out.print(',');
+        }
+        if ( i == _loopMax ) System.out.print( "... ");
+        System.out.println(']');
+    }
+
+    public static void logObjects( Collection c ) {
     System.out.print('[');
     int i = 0 ;
     if( c != null ) {
