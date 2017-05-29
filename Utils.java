@@ -212,7 +212,7 @@ public static void logDoubles(double... doubles){
 
 	public static double[] stringsToDoubles( final String[] strings ){
         double[] doubles = new double[strings.length];
-		for( int i = strings.length; --i >=0;) doubles[i] = Double.valueOf(strings[i]).intValue();
+		for( int i = strings.length; --i >=0;) doubles[i] = Double.valueOf(strings[i]).doubleValue();
 		return doubles;
 	}
 
