@@ -243,7 +243,7 @@ public class Utils {
 
 	public static double[] stringsToDoubles( final List<String> strings ){
         double[] doubles = new double[strings.size()];
-		for( int i = strings.size(); --i >=0;) doubles[i] = Double.valueOf(strings.get(i)).intValue();
+		for( int i = strings.size(); --i >=0;) doubles[i] = Double.valueOf(strings.get(i)).doubleValue();
 		return doubles;
 	}
 
