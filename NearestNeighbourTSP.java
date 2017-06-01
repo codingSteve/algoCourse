@@ -67,7 +67,6 @@ public class NearestNeighbourTSP {
     	City next = map[1];
 
     	for ( int i = cities + 1 ; --i >= 2;  ){
-    		if ( map[i]._explored ) continue;
 
     		double minDistance = Double.POSITIVE_INFINITY;
 
@@ -84,9 +83,9 @@ public class NearestNeighbourTSP {
 
     		}
     		next._explored = true;
-    		    		tour += minDistance;
+    		tour += minDistance;
 
-    		System.out.println("Adding " + next._i + " to tour (length == " + tour + ")");
+    		if ( _loud ) System.out.println("Adding " + next._i + " to tour (length == " + tour + ")");
     		previous = next;
 
     	}
