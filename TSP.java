@@ -1,4 +1,3 @@
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +35,8 @@ public class TSP {
     private static double[][] testCase7    = new double[][]{{4.00}, {0.00D, 0.00D}, {4.00D, 3.00D}, {4.00D, 0.00D}, {0.00D, 3.00D},};
     private static double     expectation7 = 14.00;
 
-    private static double[][][] testCases    = new double[][][]{testCase0,    testCase1,    testCase2,    testCase3,    testCase4,    testCase5,    testCase6,    testCase7,    };
-    private static double[]     expectations = new double[]{    expectation0, expectation1, expectation2, expectation3, expectation4, expectation5, expectation6, expectation7, };
+    public static double[][][] testCases    = new double[][][]{testCase0,    testCase1,    testCase2,    testCase3,    testCase4,    testCase5,    testCase6,    testCase7,    };
+    public static double[]     expectations = new double[]{    expectation0, expectation1, expectation2, expectation3, expectation4, expectation5, expectation6, expectation7, };
 
     public static void main(String[] ARGV) throws Exception {
         int times = 1;
@@ -96,20 +95,13 @@ public class TSP {
         if ( _loud ) Utils.logRaggedDoubles( C );
 
         for (int m = 2; m <= cities; m++) { // increase the budget of used cities until we use them all
-            if ( m >= 4 && !_loud ) { // we can start cleaning up after ourselves
-                for ( int s : sets( m-3,  cities  -1, 0)) A.remove( 1+ (s<<1) );
-            }
+            if ( m >= 4 && !_loud ) cleanUpOldSubProblems(cities, A, m);
 
-            int[] includedCities = sets(m-1,  cities-1, 0);
-
-            if ( _loud ) logIncludedCities(cities, m, includedCities);
-
-            for (int s : includedCities) {
+            for (int s : sets(m-1,  cities-1, 0)) {
                 int targetPath = includeCityOne(s);
+                if ( _loud ) logTargetPath(targetPath);
 
                 double[] costsForTargetPathEndingAt = setupAndCacheCurrentRecord( cities, A, targetPath);
-
-                if ( _loud ) logTargetPath(targetPath);
 
                 /*
                 The intention here is to find whether a particular city is on our
@@ -120,40 +112,16 @@ public class TSP {
                 for ( int j = cities+1; --j>=2; ){
 
                     int jMask = 1 << (j-1);
-                    int destinationIncluded = jMask & targetPath;
 
-                    if ( _loud ) logDestinationIncluded(targetPath, jMask, destinationIncluded);
+                    if ( _loud ) logDestinationIncluded(targetPath, jMask, jMask & targetPath);
 
                     // this destination city is not included in our current path so skip
-                    if ( destinationIncluded == 0) continue CHECKING_DESTINATIONS;
+                    if ( (jMask & targetPath) == 0) continue CHECKING_DESTINATIONS;
 
-                    double currentBestForJ = Double.POSITIVE_INFINITY;
-                    // Our sub-problem has been to everywhere in `sp` but not j
-                    int subProblem = targetPath & ~jMask;
-                    double[] subProblemRecord = A.get(subProblem);
+                    if ( _loud ) logSubProblemCities(targetPath, jMask, targetPath & ~jMask, A.get(targetPath & ~jMask));
 
-                    if ( _loud ) logSubProblemCities(targetPath, jMask, subProblem, subProblemRecord);
-
-                    /*
-                    For our sub-problem `sp - {j}` we now check each of the end points
-                    to see which is best for us to tack on the final hop to j
-                    Route := (1 .. k) + (k .. j)
-                     */
-                    CHEAPEST_ROUTE_SEARCH:
-                    for (int k = cities+1; --k >=1 ; )  {
-                        if (_loud) System.out.format("m=%d, sp=%d, j=%d, k=%d%n", m, targetPath, j, k);
-
-                        if ( j == k )                           continue CHEAPEST_ROUTE_SEARCH; //
-                        if ( (targetPath & 1 << (k - 1)) == 0 ) continue CHEAPEST_ROUTE_SEARCH; // k is not in the target path
-
-                        double newSolutionForJ = subProblemRecord[k] + C[k][j]; // stub to k then k to j
-
-                        if ( _loud ) logStubPathAndNewSolution(targetPath, subProblemRecord[k], newSolutionForJ, currentBestForJ);
-
-                        if ( currentBestForJ > newSolutionForJ ) currentBestForJ = newSolutionForJ;
-
-                    }
-                    costsForTargetPathEndingAt[j] = currentBestForJ; // starting at 1 hitting all the cities in`sp` and end at j
+                    // Our sub-problem has been to everywhere in `targetPath` but not j
+                    costsForTargetPathEndingAt[j] = getShortestForJ(C, targetPath, j, A.get(targetPath & ~jMask));
                 }
             }
         }
@@ -176,6 +144,34 @@ public class TSP {
         }
 
         return minTour ;
+    }
+
+    private static void cleanUpOldSubProblems(int cities, Map<Integer, ?> a, int m) {
+        for ( int s : sets( m-3,  cities  -1, 0)) a.remove( includeCityOne(s) );
+    }
+
+    /**
+     * For our sub-problem `sp - {j}` we now check each of the end points
+     * to see which is best for us to tack on the final hop to j
+     * Route := (1 .. k) + (k .. j)
+    */
+    private static double getShortestForJ(double[][] c, int targetPath, int j, double[] subProblemRecord) {
+        double currentBestForJ = Double.POSITIVE_INFINITY;
+
+        CHEAPEST_ROUTE_SEARCH:
+        for (int k = subProblemRecord.length; --k >=1 ; )  {
+
+            if ( j == k )                           continue CHEAPEST_ROUTE_SEARCH; //
+            if ( (targetPath & 1 << (k - 1)) == 0 ) continue CHEAPEST_ROUTE_SEARCH; // k is not in the target path
+
+            double newSolutionForJ = subProblemRecord[k] + c[k][j]; // stub to k then k to j
+
+            if ( _loud ) logStubPathAndNewSolution(targetPath, subProblemRecord[k], newSolutionForJ, currentBestForJ);
+
+            if ( currentBestForJ > newSolutionForJ ) currentBestForJ = newSolutionForJ;
+
+        }
+        return currentBestForJ;
     }
 
     private static void logSubProblems(int cities, Map<Integer, double[]> a) {
@@ -267,6 +263,9 @@ public class TSP {
         int[] result = new int[usedM.length + unusedM.length];
         System.arraycopy(usedM,0, result, 0, usedM.length);
         System.arraycopy(unusedM, 0, result, usedM.length, unusedM.length);
+
+        if ( _loud ) logIncludedCities(c, m, result);
+
         return result;
     }
 }
