@@ -35,8 +35,8 @@ public class TSP {
     private static double[][] testCase7    = new double[][]{{4.00}, {0.00D, 0.00D}, {4.00D, 3.00D}, {4.00D, 0.00D}, {0.00D, 3.00D},};
     private static double     expectation7 = 14.00;
 
-    private static double[][][] testCases    = new double[][][]{testCase0,    testCase1,    testCase2,    testCase3,    testCase4,    testCase5,    testCase6,    testCase7,    };
-    private static double[]     expectations = new double[]{    expectation0, expectation1, expectation2, expectation3, expectation4, expectation5, expectation6, expectation7, };
+    public static double[][][] testCases    = new double[][][]{testCase0,    testCase1,    testCase2,    testCase3,    testCase4,    testCase5,    testCase6,    testCase7,    };
+    public static double[]     expectations = new double[]{    expectation0, expectation1, expectation2, expectation3, expectation4, expectation5, expectation6, expectation7, };
 
     public static void main(String[] ARGV) throws Exception {
         int times = 1;

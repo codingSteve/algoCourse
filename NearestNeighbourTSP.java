@@ -58,21 +58,35 @@ public class NearestNeighbourTSP {
     	int cities = (int) rawInput[0][0];
     	City[] map = new City[cities+1];
 
-    	for ( int i = rawInput.length ; --i >= 1 ; ) map[i] = new City( rawInput[i][0], rawInput[i][1]);
-
-    	for ( int i = map.length; --i>=1 ; )
-    		for (int j = map.length; --j>=1; )
-    			map[i].addNeighbour(map[j]);
+    	for ( int i = rawInput.length ; --i >= 1 ; ) map[i] = new City( i, rawInput[i][0], rawInput[i][1]);		
 
     	double tour = 0.00D;
     	City previous = map[1];
     	previous._explored = true;
-    	City next;
+
+    	City next = map[1];
 
     	for ( int i = cities + 1 ; --i >= 2;  ){
-    		next = previous.getNearestNeighbour();
+    		if ( map[i]._explored ) continue;
+
+    		double minDistance = Double.POSITIVE_INFINITY;
+
+    		for ( int j = cities + 1; --j >= 2; ){
+    			if ( map[j]._explored ) continue;
+    			if ( i == j ) continue;
+    			City candidate = map[j];
+
+    			double distance = Math.hypot( Math.abs(previous._x - candidate._x), Math.abs(previous._y - candidate._y) );
+    			if ( minDistance > distance ) {
+    				next = candidate;
+    				minDistance = distance;
+    			}
+
+    		}
     		next._explored = true;
-    		tour += Math.hypot( Math.abs(previous._x - next._x), Math.abs(previous._y - next._y) );
+    		    		tour += minDistance;
+
+    		System.out.println("Adding " + next._i + " to tour (length == " + tour + ")");
     		previous = next;
 
     	}
@@ -82,14 +96,15 @@ public class NearestNeighbourTSP {
 
 
     private static class City{
+    	final int    _i;
     	final double _x;
     	final double _y;
     	boolean _explored = false;
 
     	private final PriorityQueue<City> neighbours;
 
-    	City( double x, double y ) { 
-    		_x = x; _y = y; 
+    	City( int i, double x, double y ) { 
+    		_i = i; _x = x; _y = y; 
     		neighbours = new PriorityQueue<City>(
     			new Comparator<City>() { 
     				public int compare(City a, City b) { 
