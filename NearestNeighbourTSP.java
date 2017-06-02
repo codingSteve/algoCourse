@@ -28,8 +28,8 @@ public class NearestNeighbourTSP {
     					long duration = System.nanoTime() - start;
 
     					double expected = expectations[j];
-    					System.out.format("Run %2d of test case %d produced %6.3f (expected %6.3f) in %10dµs%n",
-    						k, j, actual, expected, (duration/1000));
+    					System.out.format("Run %2d of test case %d produced %6.3f (expected %6.3f) from %d records in %10dµs%n",
+    						k, j, actual, expected, (int) rawInput[0][0], (duration/1000));
     					// if ( Math.abs( expected - actual  ) > DELTA ) break TESTING;
 
     				}
@@ -44,8 +44,8 @@ public class NearestNeighbourTSP {
 					double actual = nn( rawInput );
 					long duration = System.nanoTime() - start;
 
-					System.out.format("Run %2d of file %s produced %6.3f in %10dms%n",
-						j, fileName, actual, (duration/1E06));
+					System.out.format("Run %2d of file %10s produced %6.3f in %10dms%n",
+						j, fileName, actual, (int)(duration/1E06));
 				}
 
 
@@ -65,23 +65,30 @@ public class NearestNeighbourTSP {
     	previous._explored = true;
 
     	City next = map[1];
+        int explored = 1;
 
-    	for ( int i = cities + 1 ; --i >= 2;  ){
+    	while ( explored < cities ){
 
     		double minDistance = Double.POSITIVE_INFINITY;
 
     		for ( int j = cities + 1; --j >= 2; ){
-    			if ( map[j]._explored ) continue;
-    			if ( i == j ) continue;
-    			City candidate = map[j];
+                City candidate = map[j];
+
+    			if ( candidate._explored ) continue;
+    			if ( candidate == previous ) continue;
+    			
 
     			double distance = Math.hypot( Math.abs(previous._x - candidate._x), Math.abs(previous._y - candidate._y) );
-    			if ( minDistance > distance ) {
+                if ( _loud ) System.out.format(" candidate %s distance from %s is %6.3f current best %6.3f%n", 
+                    candidate, previous, distance, minDistance);
+
+    			if ( minDistance >= distance ) { // breaking ties on lower index
     				next = candidate;
     				minDistance = distance;
     			}
 
     		}
+            explored++;
     		next._explored = true;
     		tour += minDistance;
 
@@ -104,17 +111,28 @@ public class NearestNeighbourTSP {
 
     	City( int i, double x, double y ) { 
     		_i = i; _x = x; _y = y; 
-    		neighbours = new PriorityQueue<City>(
+
+            neighbours = new PriorityQueue<City>(
     			new Comparator<City>() { 
     				public int compare(City a, City b) { 
     				return (int) (Math.hypot( _x - a._x, _y - a._y) - Math.hypot( _x - b._x, _y - b._y));
     				}
     			}
     		);
+            
 
     	}
 
+        @Override
+        public String toString() {
+            return "{ _i : " + _i + ", _x : " + _x + " , _y : " + _y + '}';
+
+        }
+
+
+
     	void addNeighbour( City c ) { neighbours.add( c ); }
+
 
     	City getNearestNeighbour() { 
     		while( ! neighbours.isEmpty() ) {
