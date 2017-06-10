@@ -1,16 +1,23 @@
 import java.util.*;
 
 public class Satisfaction{
+  private static double lnToLogBase2  = 0.6931471806D;
   private static boolean _loud = false;
 
   private static int[][] testCase0      = new int[][]{{3},{1,2}, {1,2}, {2,-3}};
   private static boolean expectation0   = true;
 
   private static int[][] testCase1      = new int[][]{{3},{1,-2}, {-1,-2}, {2,-3}};
-  private static boolean expectation1   = false;
+  private static boolean expectation1   = true;
 
-  private static int[][][] testCases    = new int[][][]{ testCase0,    testCase1,    };
-  private static boolean[] expectations = new boolean[]{ expectation0, expectation1, };
+  private static int[][] testCase2      = new int[][]{{4},{1,2}, {-1,3}, {3,4}, {-2,-4}};
+  private static boolean expectation2   = true;
+
+  private static int[][] testCase3      = new int[][]{{4},{1,-2}, {-1,2}, {-2,4}, {-2,-4}, {2,4}, {2,-4},} ;
+  private static boolean expectation3   = false;
+
+  private static int[][][] testCases    = new int[][][]{ testCase0,    testCase1,    testCase2,     testCase3,    };
+  private static boolean[] expectations = new boolean[]{ expectation0, expectation1, expectation2,  expectation3, };
 
 
   public static void main( String[] ARGV ) throws Exception {
@@ -49,7 +56,7 @@ public class Satisfaction{
             System.out.format("Run %3d of test %2d produced %5s ( expected %5s ) in %10dµs.%n", 
               k, j, actual, expected, (duration / 1000) );
 
-            if ( expected != actual ) break TESTS;
+            // if ( expected != actual ) break TESTS;
           }
         }
       }
@@ -79,7 +86,7 @@ public class Satisfaction{
     if ( _loud ) Utils.logObjects( (Object[]) conditions); 
 
     int conditionsLength = conditions.length;
-    int trials = (int) Math.log( variables );
+    int trials = (int) (Math.log( variables ) / lnToLogBase2);
     long localSearchAllowance = 2*(long)Math.pow( variables, 2);
 
     // if (_loud ) System.out.format("(TRIALS, LOCAL_SEARCH)==(%d, %d)%n", trials, localSearchAllowance);
@@ -89,6 +96,7 @@ public class Satisfaction{
       // if (_loud ) System.out.println( "About to initialize for trial == " + i);
 
       initialize( instance );
+      if( _loud ) Utils.logBooleans( instance );
 
       LOCAL_SEARCH:
       for ( long j = localSearchAllowance; --j>=0; ) {
@@ -179,7 +187,13 @@ public class Satisfaction{
     }
     
     boolean test() {
-      return (_b1) ? _instance[_v1] : !  _instance[_v1] || (_b2) ? _instance[_v2] : !   _instance[_v2];
+      if ( _b1 ^ _instance[_v1] ){
+        return !( _b2 ^ _instance[_v2] );
+      }
+      else {
+        return true;
+      }
+      // return (_b1) ? _instance[_v1] : !  _instance[_v1] || (_b2) ? _instance[_v2] : !   _instance[_v2];
     }
 
     @Override
