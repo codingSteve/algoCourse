@@ -59,7 +59,7 @@ public class Satisfaction{
 
   public static boolean solve( int[][] rawInput ) {
     final int variables = rawInput[0][0];
-    final boolean[] instance = new boolean[variables];
+    final boolean[] instance = new boolean[variables+1];
     final Condition[] conditions = new Condition[rawInput.length];
 
     for ( int i = rawInput.length ; --i >= 1 ; ) { 
@@ -70,23 +70,40 @@ public class Satisfaction{
                                     );
     }
 
+    if (_loud) System.out.format("About to run for %d variables with rawInput size %d%n", variables, rawInput.length);
+
     return solve( variables, instance, conditions);
   }
 
   public static boolean solve ( int variables, boolean[] instance, Condition[] conditions ) { 
     if ( _loud ) Utils.logObjects( (Object[]) conditions); 
 
-    TRIALS:
-    for ( int i = (int) Math.log( variables ); --i>=0;){
+    int conditionsLength = conditions.length;
+    int trials = (int) Math.log( variables );
+    long localSearchAllowance = 2*(long)Math.pow( variables, 2);
 
-      Arrays.fill( instance, false);
+    // if (_loud ) System.out.format("(TRIALS, LOCAL_SEARCH)==(%d, %d)%n", trials, localSearchAllowance);
+
+    TRIALS:
+    for ( int i = trials; --i>=0;){
+      // if (_loud ) System.out.println( "About to initialize for trial == " + i);
+
+      initialize( instance );
 
       LOCAL_SEARCH:
-      for ( int j = 2*(int)Math.pow( variables, 2); --j>=0; ) {
-        fixAFailingCondition( conditions, instance );
-        if( _loud ) Utils.logBooleans( instance );
+      for ( long j = localSearchAllowance; --j>=0; ) {
+        // if (_loud ) System.out.println( "LOCAL_SEARCH j == " + j );
 
-        for ( int k = conditions.length; --k>=1; ) if ( ! conditions[k].test() ) continue LOCAL_SEARCH;
+
+        SATISFACTION_CHECK:
+        for ( int k = conditionsLength; --k>=1; ){
+          Condition c = conditions[k];
+          if ( c.test() ) continue SATISFACTION_CHECK;
+
+          maybeFixAFailingCondition( c, instance );
+          if( _loud ) Utils.logBooleans( instance );
+          continue LOCAL_SEARCH;
+        }
 
         return true;
 
@@ -95,37 +112,55 @@ public class Satisfaction{
     return false ; 
   } 
 
-  private static void fixAFailingCondition( Condition[] conditions, boolean[] instance ) {
+  private static void initialize( final boolean[] instance ) {
+    for( int j = instance.length; --j>=1 ; ) instance[j] = coinTossIsHeads();
+  }
+
+  private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
+
+  private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
+    if ( coinTossIsHeads() ) 
+      instance[ c._v1 ] ^= true;
+    else
+      instance[ c._v2 ] ^= true;
+
+    /*
+    // maybe more helpful but longer
+    // ===== 
+    instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
+    // if ( _loud ) logInstanceAndCondition( instance, c); 
+    if ( c.test() ) return;
+
+    instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
+    instance[ c._v2 ] = !instance[ c._v2 ]; // change v2
+    // if ( _loud ) logInstanceAndCondition( instance, c); 
+    if ( c.test() ) return;
+    
+    instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
+    // if ( _loud ) logInstanceAndCondition( instance, c); 
+    if ( c.test() ) return;
+
+    instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
+    instance[ c._v2 ] = !instance[ c._v2 ]; // reset v2
+    // if ( _loud ) logInstanceAndCondition( instance, c); 
+    */
+  }
+
+  @Deprecated
+  private static void maybeFixAFailingCondition( Condition[] conditions, boolean[] instance ) {
     for ( int i = conditions.length ; --i>=1 ; ){
       Condition c = conditions[i];
       if ( !c.test() ) {
         if ( _loud ) System.out.println( "Found a failing condition: " + c );
-
-        instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
-        if ( _loud ) logInstanceAndCondition( instance, c); 
-        if ( c.test() ) return;
-
-        
-        instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
-        instance[ c._v2 ] = !instance[ c._v2 ]; // change v2
-        if ( _loud ) logInstanceAndCondition( instance, c); 
-        if ( c.test() ) return;
-        
-        instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
-        if ( _loud ) logInstanceAndCondition( instance, c); 
-        
-        if ( c.test() ) return;
-
-        instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
-        instance[ c._v2 ] = !instance[ c._v2 ]; // reset v2
-        if ( _loud ) logInstanceAndCondition( instance, c); 
+        maybeFixAFailingCondition( c, instance);
       }
     }
   }
-  private static void logInstanceAndCondition( boolean[] instance, Condition c){
-    System.out.print(c);
-    Utils.logBooleans( instance );
-  }
+  
+  // private static void logInstanceAndCondition( boolean[] instance, Condition c){
+  //   System.out.print(c);
+  //   Utils.logBooleans( instance );
+  // }
 
   
   private static class Condition{

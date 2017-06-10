@@ -117,6 +117,17 @@ public class Utils {
         System.out.println(']');
     }
 
+    public static void logBooleans(boolean... booleans){
+        System.out.print('[');
+        int i  =0 ;
+        for ( ; i < booleans.length && i < _loopMax ; i++ ) {
+            System.out.print((booleans[i]) ? 'T' : 'F');
+            System.out.print(',');
+        }
+        if ( i == _loopMax ) System.out.print( "... " );
+        System.out.println(']');
+    }
+
     public static void logBigDecimals(BigDecimal... doubles){
         System.out.print('[');
         int i  =0 ;
