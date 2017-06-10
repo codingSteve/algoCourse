@@ -96,7 +96,7 @@ public class Satisfaction{
       // if (_loud ) System.out.println( "About to initialize for trial == " + i);
 
       initialize( instance );
-      if( _loud ) Utils.logBooleans( instance );
+      // if( _loud ) Utils.logBooleans( instance );
 
       LOCAL_SEARCH:
       for ( long j = localSearchAllowance; --j>=0; ) {
@@ -109,7 +109,7 @@ public class Satisfaction{
           if ( c.test() ) continue SATISFACTION_CHECK;
 
           maybeFixAFailingCondition( c, instance );
-          if( _loud ) Utils.logBooleans( instance );
+          // if( _loud ) Utils.logBooleans( instance );
           continue LOCAL_SEARCH;
         }
 
@@ -159,7 +159,7 @@ public class Satisfaction{
     for ( int i = conditions.length ; --i>=1 ; ){
       Condition c = conditions[i];
       if ( !c.test() ) {
-        if ( _loud ) System.out.println( "Found a failing condition: " + c );
+        // if ( _loud ) System.out.println( "Found a failing condition: " + c );
         maybeFixAFailingCondition( c, instance);
       }
     }
@@ -186,14 +186,15 @@ public class Satisfaction{
       _instance = instance;
     }
     
+    /**
+    * The test is for TT or FF hence not(xor(a,b))
+    */
     boolean test() {
-      if ( _b1 ^ _instance[_v1] ){
-        return !( _b2 ^ _instance[_v2] );
-      }
-      else {
-        return true;
-      }
-      // return (_b1) ? _instance[_v1] : !  _instance[_v1] || (_b2) ? _instance[_v2] : !   _instance[_v2];
+      if ( _b1 ^ _instance[_v1] )
+        if ( _b2 ^ _instance[_v2] )
+          return false;
+      
+      return true;
     }
 
     @Override
