@@ -27,4 +27,4 @@ To support a large recursive number of recursive function calls, you can use the
                        --file knapsack1.txt    \
                        --rfile knapsack_big.txt
 
-
+For linux you can use `taskset -p 1 ${PID}` or `taskset 1 java -cp . …`
