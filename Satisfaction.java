@@ -124,32 +124,41 @@ public class Satisfaction{
   private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
 
   private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
+    // final int v1 = c._v1;
+    // final int v2 = c._v2;
+
     if ( coinTossIsHeads() ) 
-      instance[ c._v1 ] ^= true;
+      flipVariable(c._v1, instance);
     else
-      instance[ c._v2 ] ^= true;
+      flipVariable(c._v2, instance);
+    
+    // if ( c.passes() ) return;
 
     /*
     // maybe more helpful but longer
     // ===== 
-    instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
-    // if ( _loud ) logInstanceAndCondition( instance, c); 
-    if ( c.test() ) return;
-
-    instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
-    instance[ c._v2 ] = !instance[ c._v2 ]; // change v2
-    // if ( _loud ) logInstanceAndCondition( instance, c); 
-    if ( c.test() ) return;
-    
-    instance[ c._v1 ] = !instance[ c._v1 ]; // change v1
-    // if ( _loud ) logInstanceAndCondition( instance, c); 
-    if ( c.test() ) return;
-
-    instance[ c._v1 ] = !instance[ c._v1 ]; // reset v1
-    instance[ c._v2 ] = !instance[ c._v2 ]; // reset v2
-    // if ( _loud ) logInstanceAndCondition( instance, c); 
     */
+    // flipVariable(v1, instance); // change v1
+    // // if ( _loud ) logInstanceAndCondition( instance, c); 
+    // if ( c.passes() ) return;
+
+    // flipVariable(v1, instance); // reset v1
+    // flipVariable(v2, instance); // change v2
+    // // if ( _loud ) logInstanceAndCondition( instance, c); 
+    // if ( c.passes() ) return;
+    
+    // flipVariable(v1, instance); // change v1
+    // // if ( _loud ) logInstanceAndCondition( instance, c); 
+    // if ( c.passes() ) return;
+
+    // flipVariable(v1, instance); // reset v1
+    // flipVariable(v2, instance); // reset v2
+    // // if ( _loud ) logInstanceAndCondition( instance, c); 
+    
+    
   }
+
+  private static void flipVariable( int i, boolean[] instance ) { instance[ i ] ^= true; }
 
   @Deprecated
   private static void maybeFixAFailingCondition( Condition[] conditions, boolean[] instance ) {
