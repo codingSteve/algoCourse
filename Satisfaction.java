@@ -109,7 +109,7 @@ public class Satisfaction{
         
         if ( k==0 ) return true;
 
-        maybeFixAFailingCondition( k, instance );
+        maybeFixAFailingCondition( conditions[k], instance );
         // if( _loud ) Utils.logBooleans( instance );
         continue LOCAL_SEARCH;
       }
@@ -123,8 +123,7 @@ public class Satisfaction{
 
   private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
 
-  private static void maybeFixAFailingCondition( int k, boolean[] instance ) {    
-    Condition c = conditions[k];
+  private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
     if ( coinTossIsHeads() ) 
       instance[ c._v1 ] ^= true;
     else
@@ -156,7 +155,7 @@ public class Satisfaction{
   private static void maybeFixAFailingCondition( Condition[] conditions, boolean[] instance ) {
     for ( int i = conditions.length ; --i>=1 ; ){
       Condition c = conditions[i];
-      if ( !c.test() ) {
+      if ( c.fails() ) {
         // if ( _loud ) System.out.println( "Found a failing condition: " + c );
         maybeFixAFailingCondition( c, instance);
       }
@@ -209,7 +208,7 @@ public class Satisfaction{
                 ((_b1) ? "" : "!" ) + _v1 +
                 " || " + 
                 ((_b2) ? "" : "!" ) + _v2 + 
-             ") -> " + test() + '}';
+             ") -> " + passes() + '}';
     }
   }
 
