@@ -102,19 +102,16 @@ public class Satisfaction{
       for ( long j = localSearchAllowance; --j>=0; ) {
         // if (_loud ) System.out.println( "LOCAL_SEARCH j == " + j );
 
+        int k = conditionsLength;
 
         SATISFACTION_CHECK:
-        for ( int k = conditionsLength; --k>=1; ){
-          Condition c = conditions[k];
-          if ( c.test() ) continue SATISFACTION_CHECK;
+        for ( ; --k>=1 ; ) if ( conditions[k].fails() ) break SATISFACTION_CHECK;
+        
+        if ( k==0 ) return true;
 
-          maybeFixAFailingCondition( c, instance );
-          // if( _loud ) Utils.logBooleans( instance );
-          continue LOCAL_SEARCH;
-        }
-
-        return true;
-
+        maybeFixAFailingCondition( k, instance );
+        // if( _loud ) Utils.logBooleans( instance );
+        continue LOCAL_SEARCH;
       }
     }   
     return false ; 
@@ -126,7 +123,8 @@ public class Satisfaction{
 
   private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
 
-  private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
+  private static void maybeFixAFailingCondition( int k, boolean[] instance ) {    
+    Condition c = conditions[k];
     if ( coinTossIsHeads() ) 
       instance[ c._v1 ] ^= true;
     else
@@ -189,12 +187,20 @@ public class Satisfaction{
     /**
     * The test is for TT or FF hence not(xor(a,b))
     */
-    boolean test() {
+    boolean passes() {
       if ( _b1 ^ _instance[_v1] )
         if ( _b2 ^ _instance[_v2] )
           return false;
       
       return true;
+    }
+
+    boolean fails() {
+      if ( _b1 ^ _instance[_v1] )
+        if ( _b2 ^ _instance[_v2] )
+          return true;
+      
+      return false;
     }
 
     @Override
