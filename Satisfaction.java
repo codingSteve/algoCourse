@@ -16,8 +16,22 @@ public class Satisfaction{
   private static int[][] testCase3      = new int[][]{{4},{1,-2}, {-1,2}, {-2,4}, {-2,-4}, {2,4}, {2,-4},} ;
   private static boolean expectation3   = false;
 
-  private static int[][][] testCases    = new int[][][]{ testCase0,    testCase1,    testCase2,     testCase3,    };
-  private static boolean[] expectations = new boolean[]{ expectation0, expectation1, expectation2,  expectation3, };
+  private static int[][] testCase4      = new int[][]{{1},{1,1}, {-1,-1}} ;
+  private static boolean expectation4   = false;
+
+  private static int[][] testCase5      = new int[][]{{2},{1,2}} ;
+  private static boolean expectation5   = true;
+
+  private static int[][] testCase6      = new int[][]{{1}, };
+  private static boolean expectation6   = true;
+
+  private static int[][] testCase7      = new int[][]{{7},{1,2},  {1,-4}, {2,-4}, {1,-5}, {3,-5}, 
+                                                          {1,-6}, {2,-6}, {3,-6}, {4,7},  {5,7},
+                                                          {6,7}} ;
+  private static boolean expectation7   = true;
+
+  private static int[][][] testCases    = new int[][][]{ testCase0,    testCase1,    testCase2,     testCase3,    testCase4,    testCase5,     testCase6,    testCase7,    };
+  private static boolean[] expectations = new boolean[]{ expectation0, expectation1, expectation2,  expectation3, expectation4, expectation5,  expectation6, expectation7, };
 
 
   public static void main( String[] ARGV ) throws Exception {
@@ -55,7 +69,7 @@ public class Satisfaction{
             System.out.format("Run %3d of test %2d produced %5s ( expected %5s ) in %10dµs.%n", 
               k, j, actual, expected, (duration / 1000) );
 
-            // if ( expected != actual ) break TESTS;
+            if ( expected != actual ) break TESTS;
           }
         }
       }
@@ -76,7 +90,7 @@ public class Satisfaction{
                                     );
     }
 
-    if (_loud) System.out.format("About to run for %d variables with rawInput size %d%n", variables, rawInput.length);
+    // if (_loud) System.out.format("About to run for %d variables with rawInput size %d%n", variables, rawInput.length);
 
     return solve( variables, instance, conditions);
   }
@@ -85,7 +99,7 @@ public class Satisfaction{
     if ( _loud ) Utils.logObjects( (Object[]) conditions); 
 
     int conditionsLength = conditions.length;
-    int trials = (int) (Math.log( variables ) / lnToLogBase2);
+    int trials = Math.max(1, (int) (Math.log( variables ) / lnToLogBase2));
     long localSearchAllowance = 2*(long)Math.pow( variables, 2);
 
     // if (_loud ) System.out.format("(TRIALS, LOCAL_SEARCH)==(%d, %d)%n", trials, localSearchAllowance);
@@ -101,16 +115,16 @@ public class Satisfaction{
       for ( long j = localSearchAllowance; --j>=0; ) {
         // if (_loud ) System.out.println( "LOCAL_SEARCH j == " + j );
 
-        int k = conditionsLength;
-
         SATISFACTION_CHECK:
-        for ( ; --k>=1 ; ) if ( conditions[k].fails() ) break SATISFACTION_CHECK;
+        for ( int k = conditionsLength ; --k>=1 ; ) {
+          if ( conditions[k].fails() ) {
+            maybeFixAFailingCondition( conditions[k], instance );
+            if( _loud ) Utils.logBooleans( instance );
+            continue LOCAL_SEARCH;
+          }
+        }
         
-        if ( k==0 ) return true;
-
-        maybeFixAFailingCondition( conditions[k], instance );
-        // if( _loud ) Utils.logBooleans( instance );
-        continue LOCAL_SEARCH;
+        return true;
       }
     }   
     return false ; 
@@ -122,49 +136,38 @@ public class Satisfaction{
 
   private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
 
+  /**
+  * Flip a coin to decide which variable to change.
+  * but only follow the suggestion if the indicated 
+  * variable is causing the Condition to fail.
+  * 
+  */
   private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
+    int v1 = c._v1;
+    int v2 = c._v2;
 
     if ( coinTossIsHeads() ) {
-      if (c.clauseOneFails() ) {
-        flipVariable(c._v1, instance);
+      if ( c.clauseOneFails() ) {
+        flipVariable( v1, instance) ;
         return;
       }
       else {
-        flipVariable(c._v2, instance);
+        flipVariable( v2, instance );
         return;
       }
     }
     
-    if (c.clauseTwoFails() ) {
-        flipVariable(c._v2, instance);
+    if ( c.clauseTwoFails() ) {
+        flipVariable( v2, instance );
         return;
       }
       else {
-        flipVariable(c._v1, instance);
+        flipVariable( v1, instance );
         return;
       }
-    
-
   }
 
   private static void flipVariable( int i, boolean[] instance ) { instance[ i ] ^= true; }
-
-  @Deprecated
-  private static void maybeFixAFailingCondition( Condition[] conditions, boolean[] instance ) {
-    for ( int i = conditions.length ; --i>=1 ; ){
-      Condition c = conditions[i];
-      if ( c.fails() ) {
-        // if ( _loud ) System.out.println( "Found a failing condition: " + c );
-        maybeFixAFailingCondition( c, instance);
-      }
-    }
-  }
-  
-  // private static void logInstanceAndCondition( boolean[] instance, Condition c){
-  //   System.out.print(c);
-  //   Utils.logBooleans( instance );
-  // }
-
   
   private static class Condition{
     final boolean[] _instance;
@@ -182,29 +185,27 @@ public class Satisfaction{
     }
     
     boolean clauseOneFails() {
-      if ( _b1 ^ _instance[_v1]) return true;
-      return false;
+      return ( _b1 != _instance[_v1] );
     }
 
     boolean clauseTwoFails() {
-      if ( _b2 ^ _instance[_v2]) return true;
-      return false;
+      return ( _b2 != _instance[_v2] );
     }
 
     /**
     * The test is for TT or FF hence not(xor(a,b))
     */
     boolean passes() {
-      if ( _b1 ^ _instance[_v1] )
-        if ( _b2 ^ _instance[_v2] )
+      if ( _b1 != _instance[_v1] )
+        if ( _b2 != _instance[_v2] )
           return false;
       
       return true;
     }
 
     boolean fails() {
-      if ( _b1 ^ _instance[_v1] )
-        if ( _b2 ^ _instance[_v2] )
+      if ( _b1 != _instance[_v1] )
+        if ( _b2 != _instance[_v2] )
           return true;
       
       return false;
