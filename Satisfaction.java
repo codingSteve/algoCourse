@@ -36,9 +36,8 @@ public class Satisfaction{
             boolean actual = solve( rawInput );
             long duration = System.nanoTime() - start;
 
-
-            System.out.format("Run %3d of file %s produced %5s in %10dµs.%n", 
-              k, fileName, actual, (duration / 1000) );
+            System.out.format("Run %3d of file %s produced %5s in %10ds.%n", 
+              k, fileName, actual, (int) (duration / 1E09) );
         }
 
       }
@@ -124,38 +123,28 @@ public class Satisfaction{
   private static boolean coinTossIsHeads() { return Math.random() > 0.5 ; }
 
   private static void maybeFixAFailingCondition( Condition c, boolean[] instance ) {    
-    // final int v1 = c._v1;
-    // final int v2 = c._v2;
 
-    if ( coinTossIsHeads() ) 
-      flipVariable(c._v1, instance);
-    else
-      flipVariable(c._v2, instance);
+    if ( coinTossIsHeads() ) {
+      if (c.clauseOneFails() ) {
+        flipVariable(c._v1, instance);
+        return;
+      }
+      else {
+        flipVariable(c._v2, instance);
+        return;
+      }
+    }
     
-    // if ( c.passes() ) return;
+    if (c.clauseTwoFails() ) {
+        flipVariable(c._v2, instance);
+        return;
+      }
+      else {
+        flipVariable(c._v1, instance);
+        return;
+      }
+    
 
-    /*
-    // maybe more helpful but longer
-    // ===== 
-    */
-    // flipVariable(v1, instance); // change v1
-    // // if ( _loud ) logInstanceAndCondition( instance, c); 
-    // if ( c.passes() ) return;
-
-    // flipVariable(v1, instance); // reset v1
-    // flipVariable(v2, instance); // change v2
-    // // if ( _loud ) logInstanceAndCondition( instance, c); 
-    // if ( c.passes() ) return;
-    
-    // flipVariable(v1, instance); // change v1
-    // // if ( _loud ) logInstanceAndCondition( instance, c); 
-    // if ( c.passes() ) return;
-
-    // flipVariable(v1, instance); // reset v1
-    // flipVariable(v2, instance); // reset v2
-    // // if ( _loud ) logInstanceAndCondition( instance, c); 
-    
-    
   }
 
   private static void flipVariable( int i, boolean[] instance ) { instance[ i ] ^= true; }
@@ -192,6 +181,16 @@ public class Satisfaction{
       _instance = instance;
     }
     
+    boolean clauseOneFails() {
+      if ( _b1 ^ _instance[_v1]) return true;
+      return false;
+    }
+
+    boolean clauseTwoFails() {
+      if ( _b2 ^ _instance[_v2]) return true;
+      return false;
+    }
+
     /**
     * The test is for TT or FF hence not(xor(a,b))
     */
