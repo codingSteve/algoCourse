@@ -46,6 +46,7 @@ public class Satisfaction{
                                                        };
 
 
+  @Deprecated
   public static void main( String[] ARGV ) throws Exception {
     int times = 1;
     for ( int i =0, l= ARGV.length; i < l; i++){
@@ -175,6 +176,7 @@ public class Satisfaction{
     return variables;
   }
 
+  @Deprecated
   public static boolean solve ( int variables, boolean[] instance, Condition[] conditions, boolean[] immutable) { 
 
     if ( conditions.length == 0 ) return true; 
