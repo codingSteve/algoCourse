@@ -128,6 +128,20 @@ public class Utils {
         System.out.println(']');
     }
 
+    public static void logBooleans(Boolean... booleans){
+        System.out.print('[');
+        int i  =0 ;
+        for ( ; i < booleans.length && i < _loopMax ; i++ ) {
+            if ( booleans[i] == null ) {
+                System.out.print("N,");
+                continue;
+            }
+
+            System.out.print((booleans[i]) ? "T," : "F,");
+        }
+        if ( i == _loopMax ) System.out.print( "... " );
+        System.out.println(']');
+    }
     public static void logBigDecimals(BigDecimal... doubles){
         System.out.print('[');
         int i  =0 ;
