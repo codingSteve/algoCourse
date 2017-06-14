@@ -203,7 +203,8 @@ public class Backtracking{
       int i = partialAssignment.length;
 
       for ( ; --i>=0 ; ) {
-        if ( partialAssignment[i] != null ) continue;
+        if ( partialAssignment[i] != null ) continue; // TODO find a variable to expand using a condition. we may be expanding pointless nodes here  
+        
 
       OPTION:
       for ( Boolean b : BOOLEANS) { // EXPAND
