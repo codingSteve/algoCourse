@@ -189,7 +189,6 @@ public class Backtracking{
 
     if ( conditions.length == 0 ) return true;
 
-
     // a sub-problem is some (partial) assignment of boolean values across the instance.
     Stack<Boolean[]> subProblems = new Stack<>();
 
@@ -204,10 +203,7 @@ public class Backtracking{
       int i = partialAssignment.length;
 
       for ( ; --i>=0 ; ) {
-        if ( partialAssignment[i] == null ) break;
-      }
-
-      if (i <= 0 ) continue;
+        if ( partialAssignment[i] != null ) continue;
 
       OPTION:
       for ( Boolean b : BOOLEANS) { // EXPAND
@@ -246,6 +242,7 @@ public class Backtracking{
           Utils.logBooleans( option );
         }
         return true; // we've got all the way to the end with this partial solution
+      }
       }
     }
 
